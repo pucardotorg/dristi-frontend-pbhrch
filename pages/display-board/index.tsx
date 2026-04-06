@@ -71,7 +71,7 @@ export default function DisplayBoard() {
   useEffect(() => {
     const fetchHearingLink = async () => {
       try {
-        const response = await fetch("/api/hearingLink");
+        const response = await fetch(`/api/hearingLink?tenantId=${tenantId}`);
         const data = await response.json();
         setHearingLink(data.link);
       } catch (error) {
