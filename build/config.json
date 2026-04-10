@@ -34,5 +34,14 @@
         "language": "nodejs",
         "version": "20",
         "sonar_sources": "src"
+    },
+    "workbench-ui": {
+        "service_group": "core-services",
+        "db_source_path": "",
+        "dockerfile_path": "workbench-ui/micro-ui/web/docker/Dockerfile",
+        "service_source_path": "workbench-ui/micro-ui",
+        "language": "nodejs",
+        "version": "14",
+        "sonar_sources": ""
     }
 }
