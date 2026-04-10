@@ -58,6 +58,7 @@ jobs:
           --build-arg NEXT_PUBLIC_ENV=local \
           -t docker.io/venkatramireddyb/oncourts-website:${{ env.VERSION }}-${{ env.COMMIT_ID }} .
           docker push docker.io/venkatramireddyb/oncourts-website:${{ env.VERSION }}-${{ env.COMMIT_ID }}
+        working-directory: oncourts-landing-page
 
       - name: set image tag
         id: set_image_tag
