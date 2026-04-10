@@ -1,0 +1,38 @@
+{
+    "digit-ui": {
+        "service_group": "core-services",
+        "db_source_path": "",
+        "dockerfile_path": "oncourts-ui/micro-ui/web/docker/Dockerfile",
+        "service_source_path": "oncourts-ui/micro-ui",
+        "language": "nodejs",
+        "version": "14",
+        "sonar_sources": ""
+    },
+    "dristi-pdf": {
+        "service_group": "core-services",
+        "db_source_path": "",
+        "dockerfile_path": "ui-integration-services/dristi-pdf/Dockerfile",
+        "service_source_path": "ui-integration-services/dristi-pdf",
+        "language": "nodejs",
+        "version": "20",
+        "sonar_sources": "src"
+    },
+    "dristi-case-pdf": {
+        "service_group": "core-services",
+        "db_source_path": "",
+        "dockerfile_path": "ui-integration-services/dristi-case-pdf/Dockerfile",
+        "service_source_path": "ui-integration-services/dristi-case-pdf",
+        "language": "nodejs",
+        "version": "20",
+        "sonar_sources": ""
+    },
+    "pdf-service": {
+        "service_group": "core-services",
+        "db_source_path": "ui-integration-services/pdf-service/migration",
+        "dockerfile_path": "ui-integration-services/pdf-service/Dockerfile",
+        "service_source_path": "ui-integration-services/pdf-service",
+        "language": "nodejs",
+        "version": "20",
+        "sonar_sources": "src"
+    }
+}
