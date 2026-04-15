@@ -52,5 +52,5 @@
         "language": "nodejs",
         "version": "20",
         "sonar_sources": ""
-    },
+    }
 }
