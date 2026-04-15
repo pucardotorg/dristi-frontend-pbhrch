@@ -43,5 +43,14 @@
         "language": "nodejs",
         "version": "14",
         "sonar_sources": ""
-    }
+    },
+    "epayments": {
+        "service_group": "core-services",
+        "db_source_path": "",
+        "dockerfile_path": "oncourts-ui/treasury-webpage/Dockerfile",
+        "service_source_path": "oncourts-ui/treasury-webpage",
+        "language": "nodejs",
+        "version": "20",
+        "sonar_sources": ""
+    },
 }
