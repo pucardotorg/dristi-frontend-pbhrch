@@ -565,7 +565,9 @@ const EmployeeForm = () => {
     setName((emp.user && emp.user.name) || "");
     setPhone((emp.user && emp.user.mobileNumber) || "");
     setEmail((emp.user && emp.user.emailId) || "");
-    setEmpType(emp.employeeType ? { code: emp.employeeType, active: true, i18key: t(emp.employeeType) } : null);
+    const empTypeObj = emp.employeeType ? { code: emp.employeeType, active: true, i18key: t(emp.employeeType) } : null;
+    setEmpType(empTypeObj);
+    setPrevEmpType(empTypeObj);
     setEmpCode(emp.code || "");
     const mapped = (emp.assignments || []).map((a, idx) => ({
       key: idx,
@@ -804,6 +806,7 @@ const EmployeeForm = () => {
       let requestdata = Object.assign({}, emp);
       requestdata.assignments = buildAssignments;
       requestdata.code = empCode || (emp.user && emp.user.userName);
+      requestdata.employeeType = empType ? empType.code : emp.employeeType;
       requestdata.jurisdictions = emp.jurisdictions;
       requestdata.user = Object.assign({}, emp.user, {
         mobileNumber: phone,
