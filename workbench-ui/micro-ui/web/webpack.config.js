@@ -17,7 +17,7 @@ module.exports = {
       {
         test: /\.css$/i,
         use: ["style-loader", "css-loader"],
-      }
+      },
     ],
   },
   output: {
@@ -27,13 +27,20 @@ module.exports = {
   },
   optimization: {
     splitChunks: {
-      chunks: 'all',
-      minSize:20000,
-      maxSize:50000,
-      enforceSizeThreshold:50000,
-      minChunks:1,
-      maxAsyncRequests:30,
-      maxInitialRequests:30
+      chunks: "all",
+      minSize: 20000,
+      maxSize: 50000,
+      enforceSizeThreshold: 50000,
+      minChunks: 1,
+      maxAsyncRequests: 30,
+      maxInitialRequests: 30,
+    },
+  },
+  resolve: {
+    fallback: {
+      fs: false,
+      path: false,
+      crypto: false,
     },
   },
   plugins: [
