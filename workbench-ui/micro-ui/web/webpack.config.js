@@ -36,12 +36,10 @@ module.exports = {
       maxInitialRequests: 30,
     },
   },
-  resolve: {
-    fallback: {
-      fs: false,
-      path: false,
-      crypto: false,
-    },
+  node: {
+    fs: "empty",
+    net: "empty",
+    tls: "empty",
   },
   plugins: [
     new CleanWebpackPlugin(),
