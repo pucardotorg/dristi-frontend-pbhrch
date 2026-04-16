@@ -596,25 +596,26 @@ const GenerateOrdersV2 = () => {
       const now = new Date();
       const fromDate = new Date(now.setHours(0, 0, 0, 0)).getTime();
       const toDate = new Date(now.setHours(23, 59, 59, 999)).getTime();
+      const tenantId = localStorage.getItem("tenant-id") || "pb";
 
       const payload = {
         inbox: {
           processSearchCriteria: {
             businessService: ["hearing-default"],
             moduleName: "Hearing Service",
-            tenantId: "kl",
+            tenantId,
           },
           moduleSearchCriteria: {
-            tenantId: "kl",
+            tenantId,
             ...(fromDate && toDate ? { fromDate, toDate } : {}),
           },
-          tenantId: "kl",
+          tenantId,
           limit: 300,
           offset: 0,
         },
       };
 
-      const res = await HomeService.InboxSearch(payload, { tenantId: "kl" });
+      const res = await HomeService.InboxSearch(payload, { tenantId });
       setData(res?.items || []);
     } catch (err) {
       console.error("error", err);
