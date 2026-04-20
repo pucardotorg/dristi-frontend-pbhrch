@@ -42,7 +42,7 @@ app.post(`${contextPath}`, async (req, res) => {
       data: returnParams.data,
       hmac: returnParams.hmac,
       authToken: returnHeader.AuthToken,
-      tenantId: "kl",
+      tenantId: "pb",
       mockEnabled: returnParams?.mockEnabled || false,
     };
 
@@ -63,7 +63,7 @@ app.post(`${contextPath}`, async (req, res) => {
             "Content-Type": "application/json",
             Authorization: "Basic ZWdvdi11c2VyLWNsaWVudDo=",
           },
-        }
+        },
       );
       console.log("Backend response:", backendResponse.data);
     } catch (backendError) {
@@ -117,7 +117,7 @@ async function refreshRequestInfo() {
       const data = qs.stringify({
         username: process.env.USERNAME || "payment-collector",
         password: process.env.PASSWORD || "Dristi@123",
-        tenantId: "kl",
+        tenantId: "pb",
         userType: "EMPLOYEE",
         scope: "read",
         grant_type: "password",
@@ -141,7 +141,7 @@ async function refreshRequestInfo() {
         msgId: "1723548200333|en_IN",
         authToken: accessToken,
         userInfo: userInfo,
-        tenantId: "kl",
+        tenantId: "pb",
       };
 
       const currentTime = new Date().getTime();
@@ -154,7 +154,7 @@ async function refreshRequestInfo() {
     } catch (error) {
       console.error(
         "Error fetching Auth token:",
-        error.response ? error.response.data : error.message
+        error.response ? error.response.data : error.message,
       );
       reject(error);
     } finally {
