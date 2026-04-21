@@ -32,6 +32,9 @@ import {
 import {
   externalAPIMapping
 } from "./utils/externalAPIMapping";
+import {
+  fetchPdfConfigFromMdms
+} from "./utils/mdmsConfigFetch";
 import envVariables from "./EnvironmentVariables";
 import QRCode from "qrcode";
 import {
@@ -88,16 +91,28 @@ app.use((req, res, next) => {
 let maxPagesAllowed = envVariables.MAX_NUMBER_PAGES;
 let serverport = envVariables.SERVER_PORT;
 
-let dataConfigUrls = envVariables.DATA_CONFIG_URLS;
-let formatConfigUrls = envVariables.FORMAT_CONFIG_URLS;
-
 let dataConfigMap = {};
 let formatConfigMap = {};
 
 let topicKeyMap = {};
 var topic = [];
-var datafileLength = dataConfigUrls.split(",").length;
 let unregisteredLocalisationCodes = [];
+
+/**
+ * Fetches data-config and format-config for the given key from MDMS v2
+ * and populates the in-memory maps. Called on every incoming request so
+ * configs are always up-to-date (no caching).
+ */
+const loadConfigForKey = async (key, tenantId, requestInfo) => {
+  if (!key || !tenantId) return;
+  const { dataConfig, formatConfig } = await fetchPdfConfigFromMdms(
+    key,
+    tenantId,
+    requestInfo
+  );
+  dataConfigMap[key] = dataConfig;
+  formatConfigMap[key] = formatConfig;
+};
 
 var fontDescriptors = {
   Cambay: {
@@ -382,6 +397,7 @@ app.post(
     
     try {
       requestInfo = get(req.body, "RequestInfo");
+      await loadConfigForKey(key, tenantId, requestInfo);
       await createAndSave(
         req,
         res,
@@ -444,6 +460,8 @@ app.post(
       
       logger.info("Request received", { requestId, endpoint: "/pdf-service/v1/_createnosave", key, tenantId });
       logger.info("Request body", { requestId, body: req.body });
+      requestInfo = get(req.body, "RequestInfo");
+      await loadConfigForKey(key, tenantId, requestInfo);
       var formatconfig = formatConfigMap[key];
       var dataconfig = dataConfigMap[key];
       var headers = JSON.parse(JSON.stringify(req.headers));
@@ -451,7 +469,6 @@ app.post(
         headers['tenantId']=headers.tenantid;
       }
 
-      requestInfo = get(req.body, "RequestInfo");
       //
       let isConsolidated = get(req.query, "isconsolidated");
       // Set isConsolidated true as default if it's not available because it's a test api
@@ -772,87 +789,8 @@ app.post(
 
 );
 
-var i = 0;
-dataConfigUrls &&
-  dataConfigUrls.split(",").map((item) => {
-    item = item.trim();
-    if (item.includes("file://")) {
-      item = item.replace("file://", "");
-      fs.readFile(item, "utf8", function (err, data) {
-        try {
-          if (err) {
-            logger.error(
-              "error when reading file for dataconfig: file:///" + item
-            );
-            logger.error(err.stack);
-          } else {
-            data = JSON.parse(data);
-            dataConfigMap[data.key] = data;
-            /*if (data.fromTopic != null) {
-              topicKeyMap[data.fromTopic] = data.key;
-              topic.push(data.fromTopic);
-            }*/
-            i++;
-            // if (i == datafileLength) {
-            //   topic.push(envVariables.KAFKA_RECEIVE_CREATE_JOB_TOPIC)
-            //   listenConsumer(topic);
-            // }
-            logger.info("loaded dataconfig: file:///" + item);
-          }
-        } catch (error) {
-          logger.error("error in loading dataconfig: file:///" + item);
-          logger.error(error.stack);
-        }
-      });
-    } else {
-      (async () => {
-        try {
-          var response = await axios.get(item);
-          dataConfigMap[response.data.key] = response.data;
-          logger.info("loaded dataconfig: " + item);
-        } catch (error) {
-          logger.error("error in loading dataconfig: " + item);
-          logger.error(error.stack);
-        }
-      })();
-    }
-  });
-
-formatConfigUrls &&
-  formatConfigUrls.split(",").map((item) => {
-    item = item.trim();
-    if (item.includes("file://")) {
-      item = item.replace("file://", "");
-      fs.readFile(item, "utf8", function (err, data) {
-        try {
-          if (err) {
-            logger.error(err.stack);
-            logger.error(
-              "error when reading file for formatconfig: file:///" + item
-            );
-          } else {
-            data = JSON.parse(data);
-            formatConfigMap[data.key] = data.config;
-            logger.info("loaded formatconfig: file:///" + item);
-          }
-        } catch (error) {
-          logger.error("error in loading formatconfig: file:///" + item);
-          logger.error(error.stack);
-        }
-      });
-    } else {
-      (async () => {
-        try {
-          var response = await axios.get(item);
-          formatConfigMap[response.data.key] = response.data.config;
-          logger.info("loaded formatconfig: " + item);
-        } catch (error) {
-          logger.error("error in loading formatconfig: " + item);
-          logger.error(error.stack);
-        }
-      })();
-    }
-  });
+// PDF data-config and format-config are now fetched on-demand from MDMS v2
+// (see loadConfigForKey + src/utils/mdmsConfigFetch.js). No startup loading.
 
 app.listen(serverport, () => {
   logger.info(`Server running at http:${serverport}/`);
@@ -887,10 +825,11 @@ export const createAndSave = async (
   }
   //let key = get(req.query || req, "key");
   let tenantId = get(req.query || req, "tenantId");
+  var requestInfo = get(req.body || req, "RequestInfo");
+  await loadConfigForKey(key, tenantId, requestInfo);
   var formatconfig = formatConfigMap[key];
   var dataconfig = dataConfigMap[key];
   var userid = get(req.body || req, "RequestInfo.userInfo.id");
-  var requestInfo = get(req.body || req, "RequestInfo");
   var documentType = get(dataconfig, "documentType", "");
   var moduleName = get(dataconfig, "DataConfigs.moduleName", "");
   let isConsolidated = getIsConsolidatedFromReq(req.query || req);
@@ -987,13 +926,14 @@ export const createNoSave = async (
     }
 
     var tenantId = get(req.query || req, "tenantId");
+    var requestInfo = get(req.body || req, "RequestInfo");
+    await loadConfigForKey(key, tenantId, requestInfo);
     var formatconfig = formatConfigMap[key];
     var dataconfig = dataConfigMap[key];
     var totalPdfRecords = get(req, "totalPdfRecords");
     var currentPdfRecords = get(req, "currentPdfRecords");
     var bulkPdfJobId = get(req, "pdfJobId");
     var numberOfFiles = get(req, "numberOfFiles");
-    var requestInfo = get(req.body || req, "RequestInfo");
     var userid = get(req.body || req, "RequestInfo.userInfo.uuid");
     var mobileNumber = get(req, "RequestInfo.userInfo.mobileNumber");
     var billd = get(req, "Bill");
