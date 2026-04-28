@@ -1,40 +1,38 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Compiled class file
+*.class
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Log file
+*.log
 
-# testing
-/coverage
+# BlueJ files
+*.ctxt
 
-# next.js
-/.next/
-/out/
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
 
-# production
-/build
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
 
-# misc
-.DS_Store
-*.pem
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+replay_pid*
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+.idea/*
+**/.idea/
+target/*
+**/target/
+.vscode/*
 
-# local env files
-.env*.local
-.env
 
-# vercel
-.vercel
+oncourts-ui/micro-ui/web/micro-ui-internals/node_modules/*
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-#pseudoCode
-pseudoCode.txt
+.classpath
+.factorypath
+.project
+.settings/

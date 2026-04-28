@@ -1,0 +1,89 @@
+import React, { useState } from "react";
+import { CloseBtn } from "@egovernments/digit-ui-module-dristi/src/components/ModalComponents";
+const Heading = (props) => {
+  return (
+    <div className="evidence-title">
+      <h1 className="heading-m">{props.label}</h1>
+    </div>
+  );
+};
+
+const styles = {
+  fontFamily: "Roboto",
+  fontSize: "16px",
+  fontWeight: 700,
+  lineHeight: "18.75px",
+  textAlign: "left",
+  textUnderlinePosition: "from-font",
+  textDecorationSkipInk: "none",
+  color: "#231F20",
+};
+
+const NameListWithModal = ({ t, data, type }) => {
+  const [open, setOpen] = useState(false);
+
+  const Modal = window?.Digit?.ComponentRegistryService?.getComponent("Modal");
+
+  const closeModal = () => {
+    setOpen(false);
+  };
+
+  return (
+    <React.Fragment>
+      {data?.length > 0 ? (
+        <React.Fragment>
+          {data?.slice(0, 2)?.map((fullName, index) => (
+            <div key={index} className="case-info-value">
+              <span>{fullName}</span>
+            </div>
+          ))}
+          {data?.length > 2 && (
+            <p
+              style={{
+                fontFamily: "Roboto",
+                fontSize: "12px",
+                fontWeight: 300,
+                lineHeight: "16px",
+                textAlign: "left",
+                textDecorationLine: "underline",
+                textDecorationStyle: "solid",
+                textUnderlinePosition: "from-font",
+                textDecorationSkipInk: "none",
+                color: "#006FD5",
+                margin: "0px",
+                cursor: "pointer",
+              }}
+              onClick={() => setOpen(true)}
+            >
+              {t("VIEW_ALL_LINK")}
+            </p>
+          )}
+        </React.Fragment>
+      ) : (
+        <React.Fragment>
+          <div className="case-info-value">
+            <span>NA</span>
+          </div>
+        </React.Fragment>
+      )}
+      {open && (
+        <Modal
+          headerBarEnd={<CloseBtn onClick={closeModal} />}
+          formId="modal-action"
+          headerBarMainStyle={{ display: "flex" }}
+          headerBarMain={<Heading label={t(type)} />}
+        >
+          <ul style={{ listStyle: "unset" }}>
+            {data?.map((fullName, index) => (
+              <li key={index} style={styles}>
+                {fullName}
+              </li>
+            ))}
+          </ul>
+        </Modal>
+      )}
+    </React.Fragment>
+  );
+};
+
+export default NameListWithModal;
