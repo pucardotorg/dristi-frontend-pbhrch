@@ -127,6 +127,8 @@ const TopBarComponent = ({
   const history = useHistory();
   const token = window.localStorage.getItem("token");
   const isUserLoggedIn = Boolean(token);
+  const isLoginRoute = pathname?.includes("/employee/user/login") || pathname?.includes("/citizen/dristi/home/login");
+  const showLoggedOutTopbarActions = !isUserLoggedIn || isLoginRoute;
   const { AdvocateData, setAdvocateDataContext } = useContext(AdvocateDataContext);
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const userInfo = JSON.parse(window.localStorage.getItem("user-info"));
@@ -286,7 +288,7 @@ const TopBarComponent = ({
 
   const seniorAdvocates = useMemo(() => {
     if (isLoadingMembers) return [];
-    if (userType === "ADVOCATE" && advocateId) {
+    if (userType === "ADVOCATE" && advocateId && userInfo?.uuid) {
       const selfDetails = [{ id: advocateId, value: advocateId, advocateName: userInfo?.name, uuid: userInfo?.uuid, allowCaseCreate: true }];
       if (officeMembersData?.members?.length > 0) {
         const seniorAdvocatesList = Array.isArray(officeMembersData?.members) ? extractedSeniorAdvocates(officeMembersData) || [] : [];
@@ -446,6 +448,10 @@ const TopBarComponent = ({
           <div
             style={{ display: "flex", gap: "16px", cursor: "pointer" }}
             onClick={() => {
+              if (showLoggedOutTopbarActions) {
+                window.location.replace(window.location.origin);
+                return;
+              }
               if (isUserLoggedIn && pathname.includes("/citizen/dristi/home/registration")) {
                 history.push(`/${window?.contextPath}/citizen/dristi/home`);
               } else {
@@ -513,7 +519,7 @@ const TopBarComponent = ({
                 )}
               </div>
             )}
-          {!hideChangeLangOnSomeUrlsWhenNotLoggedIn && !isUserLoggedIn ? changeLanguage : null}
+          {!hideChangeLangOnSomeUrlsWhenNotLoggedIn && showLoggedOutTopbarActions ? changeLanguage : null}
           {!hideNotificationIconOnSomeUrlsWhenNotLoggedIn ? (
             <div className="EventNotificationWrapper" onClick={onNotificationIconClick}>
               {notificationCountLoaded && notificationCount ? (

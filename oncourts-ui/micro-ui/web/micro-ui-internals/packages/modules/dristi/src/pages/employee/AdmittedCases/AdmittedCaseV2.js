@@ -1,6 +1,6 @@
 import { Button as ActionButton } from "@egovernments/digit-ui-components";
 import { BreadCrumbsParamsDataContext } from "@egovernments/digit-ui-module-core";
-import { Header, InboxSearchComposer, Loader, Menu, Toast, CloseSvg, CheckBox } from "@egovernments/digit-ui-react-components";
+import { Header, InboxSearchComposer, Loader, Menu, Toast, CheckBox } from "@egovernments/digit-ui-react-components";
 import React, { useCallback, useEffect, useMemo, useState, useContext, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useRouteMatch, useLocation } from "react-router-dom";
@@ -61,6 +61,7 @@ import WitnessDepositionDocModal from "./WitnessDepositionDocModal";
 import { convertTaskResponseToPayload } from "@egovernments/digit-ui-module-orders/src/utils";
 import ExaminationDrawer from "./ExaminationDrawer";
 import useSortedMDMSData from "../../../hooks/dristi/useSortedMDMSData";
+import { CloseBtn, Heading } from "../../../components/ModalComponents";
 const stateSla = {
   SCHEDULE_HEARING: 3 * 24 * 3600 * 1000,
   NOTICE: 3 * 24 * 3600 * 1000,
@@ -94,29 +95,6 @@ const homeTabEnum = {
   DELAY_CONDONATION: "HOME_DELAY_CONDONATION_APPLICATIONS",
   OTHERS: "HOME_OTHER_APPLICATIONS",
 };
-
-const Heading = (props) => {
-  return <h1 className="heading-m">{props.label}</h1>;
-};
-
-const CloseBtn = (props) => {
-  return (
-    <div
-      onClick={props?.onClick}
-      style={{
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        paddingRight: "20px",
-        cursor: "pointer",
-        ...(props?.backgroundColor && { backgroundColor: props.backgroundColor }),
-      }}
-    >
-      <CloseSvg />
-    </div>
-  );
-};
-
 const actionEnabledStatuses = ["CASE_ADMITTED", "PENDING_ADMISSION_HEARING", "PENDING_NOTICE", "PENDING_RESPONSE", "PENDING_ADMISSION"];
 const viewEnabledStatuses = [...actionEnabledStatuses, "CASE_DISMISSED"];
 const judgeReviewStages = ["CASE_ADMITTED", "PENDING_ADMISSION_HEARING", "PENDING_NOTICE", "PENDING_RESPONSE", "PENDING_ADMISSION", "CASE_DISMISSED"];
@@ -217,8 +195,6 @@ const AdmittedCaseV2 = () => {
   const { downloadPdf } = useDownloadCasePdf();
   const [isShow, setIsShow] = useState(false);
   const currentDiaryEntry = history.location?.state?.diaryEntry;
-  const historyCaseData = location?.state?.caseData;
-  const needCaseRefetch = location?.state?.needCaseRefetch;
   const historyOrderData = location?.state?.orderData;
   const newWitnesToast = history.location?.state?.newWitnesToast;
   const [isApplicationAccepted, setIsApplicationAccepted] = useState(null);
@@ -265,7 +241,7 @@ const AdmittedCaseV2 = () => {
 
   const evidenceUpdateMutation = Digit.Hooks.useCustomAPIMutationHook(reqEvidenceUpdate);
 
-  const { data: apiCaseData, isLoading: caseApiLoading, refetch: refetchCaseData, isFetching: isCaseFetching } = useCaseDetailSearchService(
+  const { data: caseData, isLoading: caseApiLoading, refetch: refetchCaseData, isFetching: isCaseFetching } = useCaseDetailSearchService(
     {
       criteria: {
         caseId: caseId,
@@ -276,13 +252,11 @@ const AdmittedCaseV2 = () => {
     {},
     `dristi-admitted-${caseId}`,
     caseId,
-    Boolean(caseId && (needCaseRefetch || !historyCaseData))
+    Boolean(caseId)
   );
 
-  const caseData = apiCaseData || historyCaseData;
   const caseDetails = useMemo(() => caseData?.cases || {}, [caseData]);
   const caseCourtId = !isCitizen ? localStorage.getItem("courtId") : caseDetails?.courtId;
-  const latestCaseDetails = useMemo(() => apiCaseData?.cases || historyCaseData?.cases || {}, [apiCaseData, historyCaseData]);
   const delayCondonationData = useMemo(() => caseDetails?.caseDetails?.delayApplications?.formdata?.[0]?.data, [caseDetails]);
 
   const cnrNumber = useMemo(() => caseDetails?.cnrNumber || "", [caseDetails]);
@@ -3691,11 +3665,25 @@ const AdmittedCaseV2 = () => {
             )}
             {(caseDetails?.courtCaseNumber || caseDetails?.cmpNumber) && (
               <React.Fragment>
-                {" "}
-                <div className="sub-details-text">{t(caseDetails?.filingNumber)}</div> <hr className="vertical-line" />
+                <div className="sub-details-text">{t(caseDetails?.filingNumber)}</div>
+                <hr className="vertical-line" />
               </React.Fragment>
             )}
-            <div className="sub-details-text">{t(caseDetails?.substage)}</div>
+            <div className="sub-details-text">Stage: {t(caseDetails?.stage)}</div>
+            {(Array.isArray(caseDetails?.secondaryStage) ? caseDetails?.secondaryStage?.length > 0 : caseDetails?.secondaryStage) && (
+              <React.Fragment>
+                <hr className="vertical-line" />
+                <div className="sub-details-text">
+                  Secondary Stage:{" "}
+                  {(Array.isArray(caseDetails?.secondaryStage) ? caseDetails?.secondaryStage : [caseDetails?.secondaryStage]).map((stage, index) => (
+                    <React.Fragment key={`${stage}-${index}`}>
+                      {index > 0 ? ", " : ""}
+                      {t(stage)}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </React.Fragment>
+            )}
             {caseDetails?.outcome && (
               <React.Fragment>
                 <hr className="vertical-line" />
@@ -4219,7 +4207,7 @@ const AdmittedCaseV2 = () => {
           joinedLitigants={[...complainants, ...respondents]}
           showPaymentConfirmationModal={showPaymentConfirmationModal}
           showPaymentDemandModal={showPaymentDemandModal}
-          caseDetails={latestCaseDetails}
+          caseDetails={caseDetails}
           tenantId={tenantId}
         />
       )}{" "}
