@@ -92,7 +92,7 @@ export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   const { path } = useRouteMatch();
   const history = useHistory();
   const moduleCode = ["DRISTI", "CASE", "ORDERS", "SUBMISSIONS", "HEARINGS"];
-  const tenantID = tenants?.[0]?.code?.split(".")?.[0];
+  const tenantID = window?.Digit.ULBService.getCurrentTenantId();
   const language = Digit.StoreData.getCurrentLanguage();
   const { isLoading } = Digit.Services.useStore({ stateCode, moduleCode, language });
   const userInfo = useMemo(() => Digit?.UserService?.getUser()?.info, [Digit]); //here
