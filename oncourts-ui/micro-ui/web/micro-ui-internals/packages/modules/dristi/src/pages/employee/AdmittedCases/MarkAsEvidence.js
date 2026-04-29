@@ -449,9 +449,9 @@ const MarkAsEvidence = ({
         return data && hasNumberSuffix(data)
           ? {
               witnessTag: data || "",
-              fullName: litigant?.additionalDetails?.fullName,
+              fullName: litigant?.fullName,
               code: data,
-              displayName: data + " (" + litigant?.additionalDetails?.fullName + ")",
+              displayName: data + " (" + litigant?.fullName + ")",
             }
           : null;
       });
@@ -471,9 +471,9 @@ const MarkAsEvidence = ({
         return data && hasNumberSuffix(data)
           ? {
               witnessTag: data || "",
-              fullName: poa?.name,
+              fullName: poa?.fullName,
               code: data,
-              displayName: data + " (" + poa?.name + ")",
+              displayName: data + " (" + poa?.fullName + ")",
             }
           : null;
       });

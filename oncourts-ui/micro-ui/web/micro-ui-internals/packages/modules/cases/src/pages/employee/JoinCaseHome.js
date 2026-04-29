@@ -24,6 +24,7 @@ import { SubmissionWorkflowAction } from "@egovernments/digit-ui-module-orders/s
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { CloseBtn } from "@egovernments/digit-ui-module-dristi/src/components/ModalComponents";
 import { JoinHomeLocalisation, optionsStatus } from "../../utils/constants";
+import { transformCaseDataForFetching } from "@egovernments/digit-ui-module-dristi/src/pages/citizen/FileCase/EfilingValidationUtils";
 
 const Heading = (props) => {
   return (
@@ -397,8 +398,9 @@ const JoinCaseHome = ({ refreshInbox, setShowJoinCase, showJoinCase, type, data 
     return { file: fileUploadRes?.data, fileType: fileData.type, filename };
   };
 
-  const getComplainantListNew = (formdata) => {
-    const complainantList = formdata?.map((data, index) => {
+  const getComplainantListNew = () => {
+    const newCaseDetails = transformCaseDataForFetching(caseDetails, ["complainantDetails"]);
+    const complainantList = newCaseDetails?.additionalDetails?.complainantDetails?.formdata?.map((data, index) => {
       const individualId = data?.data?.complainantVerification?.individualDetails?.individualId;
 
       const { representatives } = searchLitigantInRepresentives(caseDetails?.representatives, individualId);
@@ -548,7 +550,7 @@ const JoinCaseHome = ({ refreshInbox, setShowJoinCase, showJoinCase, type, data 
           ?.filter((represent) => represent?.representing?.[0]?.partyType?.includes("respondent"))
           ?.map((represent) => represent?.additionalDetails?.advocateName),
       }));
-      getComplainantListNew(caseDetails?.additionalDetails?.complainantDetails?.formdata);
+      getComplainantListNew();
       getRespondentList(caseDetails?.additionalDetails?.respondentDetails?.formdata);
     }
   }, [caseDetails, t, selectPartyData?.userType?.value]);
@@ -727,12 +729,12 @@ const JoinCaseHome = ({ refreshInbox, setShowJoinCase, showJoinCase, type, data 
         if (party.isComplainant) {
           setSuccessScreenData((successScreenData) => ({
             ...successScreenData,
-            complainantAdvocateList: [...advocateList?.map((adv) => adv?.additionalDetails?.fullName)],
+            complainantAdvocateList: [...advocateList?.map((adv) => adv?.additionalDetails?.advocateName)],
           }));
         } else {
           setSuccessScreenData((successScreenData) => ({
             ...successScreenData,
-            respondentAdvocateList: [...advocateList?.map((adv) => adv?.additionalDetails?.fullName)],
+            respondentAdvocateList: [...advocateList?.map((adv) => adv?.additionalDetails?.advocateName)],
           }));
         }
 

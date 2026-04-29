@@ -17,7 +17,7 @@ const _getBailOrderData = (order) => {
   let orderDetails = {};
   if (order?.orderCategory === "COMPOSITE") {
     orderDetails = order?.compositeItems?.find(
-      (item) => item?.orderType === "ACCEPT_BAIL"
+      (item) => item?.orderType === "ACCEPT_BAIL",
     )?.orderSchema?.orderDetails;
   } else {
     orderDetails = order?.orderDetails;
@@ -54,7 +54,7 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
     return renderError(
       res,
       `${missingFields.join(", ")} are mandatory to generate the PDF`,
-      400
+      400,
     );
   }
 
@@ -63,7 +63,7 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
     const resCase = await handleApiCall(
       res,
       () => search_case(cnrNumber, tenantId, requestInfo, order?.courtId),
-      "Failed to query case service"
+      "Failed to query case service",
     );
     const courtCase = resCase?.data?.criteria[0]?.responseList[0];
     if (!courtCase) {
@@ -73,7 +73,7 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
     const resMessage = await handleApiCall(
       res,
       () => search_message(tenantId, "rainmaker-common", "en_IN", requestInfo),
-      "Failed to query Localized messages"
+      "Failed to query Localized messages",
     );
     const messages = resMessage?.data?.messages;
     const messagesMap = messages.reduce((acc, curr) => {
@@ -84,15 +84,15 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
     const resHearing = await handleApiCall(
       res,
       () => search_hearing(tenantId, cnrNumber, requestInfo, order?.courtId),
-      "Failed to query hearing service"
+      "Failed to query hearing service",
     );
 
     const hearingInProgress = resHearing?.data?.HearingList.find(
-      (hearing) => hearing?.status === config.workFlowState.hearing.INPROGRESS
+      (hearing) => hearing?.status === config.workFlowState.hearing.INPROGRESS,
     );
 
     const hearingScheduled = resHearing?.data?.HearingList.find(
-      (hearing) => hearing?.status === config.workFlowState.hearing.SCHEDULED
+      (hearing) => hearing?.status === config.workFlowState.hearing.SCHEDULED,
     );
 
     const mdmsCourtRoom = courtCaseJudgeDetails.mdmsCourtRoom;
@@ -108,9 +108,9 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
             tenantId,
             code,
             entityId,
-            requestInfo
+            requestInfo,
           ),
-        "Failed to query sunbirdrc credential service"
+        "Failed to query sunbirdrc credential service",
       );
       const $ = cheerio.load(resCredential.data);
       const imgTag = $("img");
@@ -118,7 +118,7 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
         return renderError(
           res,
           "No img tag found in the sunbirdrc response",
-          500
+          500,
         );
       }
       base64Url = imgTag.attr("src");
@@ -136,28 +136,20 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
         courtCase?.representatives?.filter((rep) =>
           rep?.representing?.some(
             (complainant) =>
-              complainant?.individualId === litigant?.individualId
-          )
+              complainant?.individualId === litigant?.individualId,
+          ),
         ) || [],
     }));
 
     const complainants =
       litigants?.filter((litigant) =>
-        litigant.partyType.includes("complainant")
+        litigant.partyType.includes("complainant"),
       ) || [];
 
     const complainantList = complainants?.map((complainant) => {
-      const complainantInAdditionalDetails =
-        courtCase?.additionalDetails?.complainantDetails?.formdata?.find(
-          (comp) =>
-            comp?.data?.complainantVerification?.individualDetails
-              ?.individualId === complainant?.individualId
-        );
-      const address = getStringAddressDetails(
-        complainantInAdditionalDetails?.data?.addressDetails
-      );
+      const address = getStringAddressDetails(complainant?.permanentAddress);
       return {
-        name: complainant?.additionalDetails?.fullName,
+        name: complainant?.fullName,
         address: address,
         listOfAdvocatesRepresenting: complainant?.representatives
           ?.map((rep) => rep?.additionalDetails?.advocateName)
@@ -172,7 +164,7 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
           courtCase?.additionalDetails?.respondentDetails?.formdata?.find(
             (comp) =>
               comp?.data?.respondentVerification?.individualDetails
-                ?.individualId === accused?.individualId
+                ?.individualId === accused?.individualId,
           );
         const addresses = (
           accusedInAdditionalDetails?.data?.addressDetails || []
@@ -182,7 +174,7 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
         return {
           displayIndex: accusedInAdditionalDetails?.displayindex + 1 ?? null,
           individualId: accused?.individualId,
-          name: accused?.additionalDetails?.fullName,
+          name: accused?.fullName,
           address: addresses?.join(", ") || "",
           listOfAdvocatesRepresenting: accused?.representatives
             ?.map((rep) => rep?.additionalDetails?.advocateName)
@@ -216,23 +208,23 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
               (joined) =>
                 joined?.individualId &&
                 unJoined?.individualId &&
-                joined?.individualId === unJoined?.individualId
-            )
+                joined?.individualId === unJoined?.individualId,
+            ),
         ) || [];
 
     const accusedList = [...joinedAccuseds, ...unJoinedAccuseds]
       .sort(
-        (a, b) => (a.displayIndex ?? Infinity) - (b.displayIndex ?? Infinity)
+        (a, b) => (a.displayIndex ?? Infinity) - (b.displayIndex ?? Infinity),
       )
       .map(({ displayIndex, ...rest }) => rest);
 
     const listOfPresentAttendees =
       order?.attendance?.Present?.map(
-        (attendee) => messagesMap[attendee] || attendee
+        (attendee) => messagesMap[attendee] || attendee,
       )?.join(", ") || "";
     const listOfAbsentAttendees =
       order?.attendance?.Absent?.map(
-        (attendee) => messagesMap[attendee] || attendee
+        (attendee) => messagesMap[attendee] || attendee,
       )?.join(", ") || "";
     const isHearingInProgress = !!hearingInProgress || order?.hearingNumber;
 
@@ -240,7 +232,7 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
       if (order?.orderCategory === "INTERMEDIATE") return order;
 
       const scheduleItem = order?.compositeItems?.find(
-        (item) => item?.orderType === "SCHEDULE_OF_HEARING_DATE"
+        (item) => item?.orderType === "SCHEDULE_OF_HEARING_DATE",
       );
 
       return {
@@ -253,14 +245,16 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
 
     const isRescheduleApplicationCompositeOrder = (() => {
       if (order?.orderCategory === "INTERMEDIATE") {
-        if(order?.orderType === "ACCEPT_RESCHEDULING_REQUEST") {
+        if (order?.orderType === "ACCEPT_RESCHEDULING_REQUEST") {
           const rawDate = order?.orderDetails?.newHearingDate;
           const isValidDate = isNotToday(rawDate);
           return {
             isReschedule: isValidDate,
-            nextHearingDate: isValidDate ? formatDate(rawDate, "DD-MM-YYYY") : "",
-            purposeOfNextHearing: isValidDate 
-              ? (messagesMap[order?.orderDetails?.purposeOfHearing] || "") 
+            nextHearingDate: isValidDate
+              ? formatDate(rawDate, "DD-MM-YYYY")
+              : "",
+            purposeOfNextHearing: isValidDate
+              ? messagesMap[order?.orderDetails?.purposeOfHearing] || ""
               : "",
           };
         }
@@ -269,21 +263,23 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
       }
 
       const scheduleItem = order?.compositeItems?.find(
-        (item) => item?.orderType === "SCHEDULE_OF_HEARING_DATE"
+        (item) => item?.orderType === "SCHEDULE_OF_HEARING_DATE",
       );
       const acceptItem = order?.compositeItems?.find(
-        (item) => item?.orderType === "ACCEPT_RESCHEDULING_REQUEST"
+        (item) => item?.orderType === "ACCEPT_RESCHEDULING_REQUEST",
       );
 
       const isBothPresent = Boolean(scheduleItem && acceptItem);
-      if(!isBothPresent && acceptItem) { 
+      if (!isBothPresent && acceptItem) {
         const rawDate = acceptItem?.orderSchema?.orderDetails?.newHearingDate;
         const isValidDate = isNotToday(rawDate);
         return {
           isReschedule: isValidDate,
           nextHearingDate: isValidDate ? formatDate(rawDate, "DD-MM-YYYY") : "",
-          purposeOfNextHearing: isValidDate 
-            ? (messagesMap[acceptItem?.orderSchema?.orderDetails?.purposeOfHearing] || "") 
+          purposeOfNextHearing: isValidDate
+            ? messagesMap[
+                acceptItem?.orderSchema?.orderDetails?.purposeOfHearing
+              ] || ""
             : "",
         };
       }
@@ -292,7 +288,7 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
         nextHearingDate: isBothPresent
           ? formatDate(
               scheduleItem?.orderSchema?.orderDetails?.hearingDate,
-              "DD-MM-YYYY"
+              "DD-MM-YYYY",
             )
           : "",
         purposeOfNextHearing: isBothPresent
@@ -306,13 +302,13 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
     const nextHearingDate = order?.nextHearingDate
       ? formatDate(new Date(order?.nextHearingDate), "DD-MM-YYYY")
       : hearingScheduled?.startTime
-      ? formatDate(new Date(hearingScheduled?.startTime), "DD-MM-YYYY")
-      : scheduleHearingItem?.orderDetails?.hearingDate
-      ? formatDate(
-          new Date(scheduleHearingItem?.orderDetails?.hearingDate),
-          "DD-MM-YYYY"
-        )
-      : "";
+        ? formatDate(new Date(hearingScheduled?.startTime), "DD-MM-YYYY")
+        : scheduleHearingItem?.orderDetails?.hearingDate
+          ? formatDate(
+              new Date(scheduleHearingItem?.orderDetails?.hearingDate),
+              "DD-MM-YYYY",
+            )
+          : "";
     const purposeOfNextHearing =
       messagesMap[order?.purposeOfNextHearing || ""] ||
       messagesMap[hearingScheduled?.hearingType || ""] ||
@@ -327,7 +323,7 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
     const bailOrderData = _getBailOrderData(order);
 
     const isHearingEnabled = Boolean(
-      isRescheduleApplicationCompositeOrder?.isReschedule || isNextHearing
+      isRescheduleApplicationCompositeOrder?.isReschedule || isNextHearing,
     );
 
     const finalPurposeOfHearing =
@@ -376,7 +372,7 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
     const pdfResponse = await handleApiCall(
       res,
       () => create_pdf(tenantId, pdfKey, data, req.body),
-      "Failed to generate PDF of generic order"
+      "Failed to generate PDF of generic order",
     );
 
     const filename = `${pdfKey}_${new Date().getTime()}`;
@@ -397,7 +393,7 @@ async function newOrderGeneric(req, res, qrCode, order, courtCaseJudgeDetails) {
       res,
       "Failed to query details of generic order",
       500,
-      ex
+      ex,
     );
   }
 }

@@ -17,7 +17,7 @@ async function orderDismissCase(
   qrCode,
   order,
   compositeOrder,
-  courtCaseJudgeDetails
+  courtCaseJudgeDetails,
 ) {
   const cnrNumber = req.query.cnrNumber;
   const tenantId = req.query.tenantId;
@@ -36,7 +36,7 @@ async function orderDismissCase(
     return renderError(
       res,
       `${missingFields.join(", ")} are mandatory to generate the PDF`,
-      400
+      400,
     );
   }
 
@@ -45,7 +45,7 @@ async function orderDismissCase(
     const resCase = await handleApiCall(
       res,
       () => search_case(cnrNumber, tenantId, requestInfo, order?.courtId),
-      "Failed to query case service"
+      "Failed to query case service",
     );
     const courtCase = resCase?.data?.criteria[0]?.responseList[0];
     if (!courtCase) {
@@ -66,9 +66,9 @@ async function orderDismissCase(
           false,
           courtCase.filingNumber,
           "PUBLISHED",
-          "NOTICE"
+          "NOTICE",
         ),
-      "Failed to query order service"
+      "Failed to query order service",
     );
 
     const noticeList = listOfAllOrder.data.list.map((item) => {
@@ -84,8 +84,8 @@ async function orderDismissCase(
 
     const complainantName =
       courtCase?.litigants?.find(
-        (litigant) => litigant.partyType === "complainant.primary"
-      )?.additionalDetails?.fullName || "";
+        (litigant) => litigant.partyType === "complainant.primary",
+      )?.fullName || "";
 
     // Handle QR code if enabled
     let base64Url = "";
@@ -97,9 +97,9 @@ async function orderDismissCase(
             tenantId,
             code,
             entityId,
-            requestInfo
+            requestInfo,
           ),
-        "Failed to query sunbirdrc credential service"
+        "Failed to query sunbirdrc credential service",
       );
       const $ = cheerio.load(resCredential.data);
       const imgTag = $("img");
@@ -107,7 +107,7 @@ async function orderDismissCase(
         return renderError(
           res,
           "No img tag found in the sunbirdrc response",
-          500
+          500,
         );
       }
       base64Url = imgTag.attr("src");
@@ -173,7 +173,7 @@ async function orderDismissCase(
       const pdfResponse = await handleApiCall(
         res,
         () => create_pdf_v2(tenantId, pdfKey, data, req.body),
-        "Failed to generate PDF of generic order"
+        "Failed to generate PDF of generic order",
       );
       return pdfResponse.data;
     }
@@ -181,7 +181,7 @@ async function orderDismissCase(
     const pdfResponse = await handleApiCall(
       res,
       () => create_pdf(tenantId, pdfKey, data, req.body),
-      "Failed to generate PDF of Order for Dismiss Case"
+      "Failed to generate PDF of Order for Dismiss Case",
     );
 
     const filename = `${pdfKey}_${new Date().getTime()}`;

@@ -11,19 +11,19 @@ async function processOthersSection(
   tenantId,
   requestInfo,
   TEMP_FILES_DIR,
-  indexCopy
+  indexCopy,
 ) {
   const section = filterCaseBundleBySection(caseBundleMaster, "others");
   const sortedSection = [...section].sort(
-    (secA, secB) => secA.sorton - secB.sorton
+    (secA, secB) => secA.sorton - secB.sorton,
   );
 
   const sectionPosition = indexCopy.sections?.findIndex(
-    (s) => s.name === "others"
+    (s) => s.name === "others",
   );
   const dynamicSectionNumber = getDynamicSectionNumber(
     indexCopy,
-    sectionPosition
+    sectionPosition,
   );
 
   if (!sortedSection || sortedSection.length === 0) return;
@@ -68,7 +68,7 @@ async function processOthersSection(
     if (!fn) {
       throw new Error(
         `Mapping missing for section "${section}" with docType "${docType}". ` +
-          "Please define a handler inside docToSearchCallMapping."
+          "Please define a handler inside docToSearchCallMapping.",
       );
     }
     return await fn(docType);
@@ -79,7 +79,7 @@ async function processOthersSection(
     const section = sortedSection[i];
     const documents = await getDocumentsFromMapping(
       section.section,
-      section.doctype
+      section.doctype,
     );
 
     if (!documents || documents.length === 0) continue;
@@ -95,16 +95,15 @@ async function processOthersSection(
 
         if (section.docketpagerequired === "yes" && index === 0) {
           const complainant = courtCase.litigants?.find((litigant) =>
-            litigant.partyType?.includes("complainant.primary")
+            litigant.partyType?.includes("complainant.primary"),
           );
 
-          const docketComplainantName =
-            complainant?.additionalDetails?.fullName || "";
+          const docketComplainantName = complainant?.fullName || "";
 
           const docketAdvocate = courtCase.representatives?.find((adv) =>
             adv.representing?.some(
-              (party) => party.individualId === complainant?.individualId
-            )
+              (party) => party.individualId === complainant?.individualId,
+            ),
           );
 
           const docketNameOfAdvocate =
@@ -126,14 +125,14 @@ async function processOthersSection(
               docketCounselFor,
               docketNameOfFiling: docketNameOfAdvocate || docketComplainantName,
               docketDateOfSubmission: new Date(
-                courtCase.registrationDate
+                courtCase.registrationDate,
               ).toLocaleDateString("en-IN"),
               documentPath,
             },
             courtCase,
             tenantId,
             requestInfo,
-            TEMP_FILES_DIR
+            TEMP_FILES_DIR,
           );
         }
 
@@ -144,13 +143,13 @@ async function processOthersSection(
           createPDF: false,
           content: "others",
         };
-      })
+      }),
     );
     allDocumentsLineItems.push(...digitizedDocumentsLineItems);
   }
 
   const otherDocumentsIndexSection = indexCopy.sections?.find(
-    (section) => section.name === "others"
+    (section) => section.name === "others",
   );
 
   if (otherDocumentsIndexSection) {

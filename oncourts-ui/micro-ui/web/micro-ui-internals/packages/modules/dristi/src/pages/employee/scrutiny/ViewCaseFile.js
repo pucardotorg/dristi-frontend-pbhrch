@@ -163,7 +163,7 @@ function ViewCaseFile({ t, inViewCase = false, caseDetailsAdmitted }) {
 
   const caseDetails = useMemo(() => {
     const caseDetails = structuredClone(caseFetchResponse?.criteria?.[0]?.responseList?.[0] || caseDetailsAdmitted || {});
-    const updatedCaseData = transformCaseDataForFetching(caseDetails, ["witnessDetails", "advocateDetails"]);
+    const updatedCaseData = transformCaseDataForFetching(caseDetails, ["witnessDetails", "advocateDetails", "complainantDetails"]);
     return updatedCaseData;
   }, [caseFetchResponse, caseDetailsAdmitted]);
 
@@ -355,7 +355,7 @@ function ViewCaseFile({ t, inViewCase = false, caseDetailsAdmitted }) {
                             .filter((doc) => doc.additionalDetails?.fileType === "respondent-response")
                             ?.map((doc) => ({
                               ...doc,
-                              fileName: `${t("RESPONSE_SUBMISSION")} (${party?.additionalDetails?.fullName})`,
+                              fileName: `${t("RESPONSE_SUBMISSION")} (${party?.fullName})`,
                             }))
                         );
                       const vakalatnamaDocument = caseDetails?.representatives
@@ -381,7 +381,7 @@ function ViewCaseFile({ t, inViewCase = false, caseDetailsAdmitted }) {
                             .filter((doc) => doc?.additionalDetails?.documentName === "UPLOAD_PIP_AFFIDAVIT")
                             ?.map((doc) => ({
                               ...doc,
-                              fileName: `${t(doc?.additionalDetails?.documentName)} (${party?.additionalDetails?.fullName})`,
+                              fileName: `${t(doc?.additionalDetails?.documentName)} (${party?.fullName})`,
                             }))
                         );
 

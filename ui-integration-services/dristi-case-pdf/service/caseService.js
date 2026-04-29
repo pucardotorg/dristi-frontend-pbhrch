@@ -266,14 +266,14 @@ function getDelayCondonationDetails(cases) {
  */
 function getPrayerSwornStatementDetails(cases) {
   if (
-    !cases.additionalDetails ||
-    !cases.additionalDetails.prayerSwornStatement ||
-    !cases.additionalDetails.prayerSwornStatement.formdata
+    !cases.caseDetails ||
+    !cases.caseDetails.prayerSwornStatement ||
+    !cases.caseDetails.prayerSwornStatement.formdata
   ) {
     return [];
   }
   const prayerSwornStatementDetailsList =
-    cases.additionalDetails.prayerSwornStatement.formdata.map((dataItem) => {
+    cases.caseDetails.prayerSwornStatement.formdata.map((dataItem) => {
       const swornStatementData = dataItem.data || {};
 
       return {
@@ -334,24 +334,17 @@ function getPrayerSwornStatementDetails(cases) {
 }
 
 function getComplainantsDetailsForComplaint(cases) {
-  if (
-    !cases?.additionalDetails ||
-    !cases?.additionalDetails?.complainantDetails ||
-    !cases?.additionalDetails?.complainantDetails?.formdata
-  ) {
+  if (!cases?.litigants) {
     return [];
   }
-  return cases?.additionalDetails?.complainantDetails?.formdata?.map(
-    (formData) => {
-      const data = formData?.data;
-      const complainantType = data?.complainantType || "";
-      const firstName = data?.firstName || "";
-      const middleName = data?.middleName || "";
-      const lastName = data?.lastName || "";
-      const phoneNumber =
-        (data?.complainantVerification &&
-          data?.complainantVerification?.mobileNumber) ||
-        "";
+  return cases?.litigants
+    ?.filter((lit) => lit?.partyType?.includes("complainant"))
+    ?.map((complainant) => {
+      const complainantType = complainant?.complainantType || "";
+      const firstName = complainant?.firstName || "";
+      const middleName = complainant?.middleName || "";
+      const lastName = complainant?.lastName || "";
+      const phoneNumber = complainant?.mobileNumber?.[0] || "";
       const allAdvocateDetails = getAdvocateDetailsForComplainant(cases);
       const currentAdvocateDetails = allAdvocateDetails?.find(
         (advocateDetails) =>
@@ -360,50 +353,42 @@ function getComplainantsDetailsForComplaint(cases) {
       );
 
       if (complainantType.code === "REPRESENTATIVE") {
-        const companyDetails = data.addressCompanyDetails || {};
-        const companyAddress = getStringAddressDetails(companyDetails);
+        const companyAddress = getStringAddressDetails(
+          complainant.companyAddress,
+        );
 
         return {
           ifIndividual: false,
-          institutionName: data?.complainantCompanyName || "",
+          institutionName: complainant?.companyName || "",
           complainantAddress: companyAddress || "",
           nameOfAuthorizedSignatory:
             [firstName, middleName, lastName].filter(Boolean).join(" ") || "",
-          designationOfAuthorizedSignatory: data?.complainantDesignation || "",
+          designationOfAuthorizedSignatory: complainant?.designation || "",
           companyDetailsFileStore:
             getDocumentFileStore(
-              data?.companyDetailsUpload,
+              { document: companyProof },
               "Company documents",
             ) || "",
           advocateList: currentAdvocateDetails?.advocateList,
           isPartyInPerson: currentAdvocateDetails?.isPartyInPerson,
         };
       } else {
-        const addressDetails =
-          (data?.complainantVerification &&
-            data?.complainantVerification?.individualDetails &&
-            data?.complainantVerification?.individualDetails?.addressDetails) ||
-          {};
-        const address = getStringAddressDetails(addressDetails);
+        const address = getStringAddressDetails(complainant.permanentAddress);
 
         return {
           ifIndividual: true,
           complainantName:
             [firstName, middleName, lastName].filter(Boolean).join(" ") || "",
-          complainantAge: data?.complainantAge || "",
+          complainantAge: complainant?.age || "",
           complainantAddress: address || "",
           phoneNumber: phoneNumber || "",
           emailId: "",
-          complainantIdProofFileStore:
-            getDocumentFileStore(
-              data?.complainantVerification?.individualDetails,
-            ) || "",
+          complainantIdProofFileStore: complainantIdProof?.fileStore || "",
           advocateList: currentAdvocateDetails?.advocateList,
           isPartyInPerson: currentAdvocateDetails?.isPartyInPerson,
         };
       }
-    },
-  );
+    });
 }
 
 function getAdvocateDetailsForComplainant(cases) {
@@ -780,10 +765,10 @@ function getComplainantPlaceholderList(caseDetails) {
 
     if (litigant?.poaHolder) {
       const representedNames = litigant?.poaHolder?.representingLitigants
-        ?.map((rep) => rep?.additionalDetails?.fullName)
+        ?.map((rep) => rep?.fullName)
         ?.filter(Boolean)
         ?.join(", ");
-      placeholder = `${litigant?.poaHolder?.name} - PoA holder for ${representedNames}`;
+      placeholder = `${litigant?.poaHolder?.fullName} - PoA holder for ${representedNames}`;
       litigant?.poaHolder?.representingLitigants?.forEach((rep) => {
         processedLitigantIds.add(rep?.individualId);
       });
@@ -793,15 +778,15 @@ function getComplainantPlaceholderList(caseDetails) {
       );
       if (complainantPoaHolder) {
         const representedNames = complainantPoaHolder?.representingLitigants
-          ?.map((rep) => rep?.additionalDetails?.fullName)
+          ?.map((rep) => rep?.fullName)
           ?.filter(Boolean)
           ?.join(", ");
-        placeholder = `${litigant?.additionalDetails?.fullName} - Complainant ${litigant?.additionalDetails?.currentPosition}, PoA holder for ${representedNames}`;
+        placeholder = `${litigant?.fullName} - Complainant ${litigant?.additionalDetails?.currentPosition}, PoA holder for ${representedNames}`;
         complainantPoaHolder?.representingLitigants?.forEach((rep) => {
           processedLitigantIds.add(rep?.individualId);
         });
       } else {
-        placeholder = `${litigant?.additionalDetails?.fullName} - Complainant ${litigant?.additionalDetails?.currentPosition}`;
+        placeholder = `${litigant?.fullName} - Complainant ${litigant?.additionalDetails?.currentPosition}`;
         processedLitigantIds.add(litigant?.individualId);
       }
     }

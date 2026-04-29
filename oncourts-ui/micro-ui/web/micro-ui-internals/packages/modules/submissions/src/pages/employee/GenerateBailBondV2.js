@@ -247,24 +247,24 @@ const GenerateBailBondV2 = () => {
     if (isAdvocateLoggedIn) {
       return isAdvocateLoggedIn?.representing?.map((r) => {
         return {
-          code: r?.additionalDetails?.fullName,
-          name: r?.additionalDetails?.fullName,
+          code: r?.fullName,
+          name: r?.fullName,
           uuid: r?.additionalDetails?.uuid,
         };
       });
     } else if (isPipLoggedIn) {
       return [
         {
-          code: isPipLoggedIn?.additionalDetails?.fullName,
-          name: isPipLoggedIn?.additionalDetails?.fullName,
+          code: isPipLoggedIn?.fullName,
+          name: isPipLoggedIn?.fullName,
           uuid: isPipLoggedIn?.additionalDetails?.uuid,
         },
       ];
     } else if (accusedLoggedIn) {
       return [
         {
-          code: accusedLoggedIn?.additionalDetails?.fullName,
-          name: accusedLoggedIn?.additionalDetails?.fullName,
+          code: accusedLoggedIn?.fullName,
+          name: accusedLoggedIn?.fullName,
           uuid: accusedLoggedIn?.additionalDetails?.uuid,
         },
       ];
@@ -705,7 +705,7 @@ const GenerateBailBondV2 = () => {
       const newObject = {
         ...getPendingTaskPayload,
         litigantId: selectedRepresentative?.additionalDetails?.uuid || getPendingTaskPayload?.litigantUuid,
-        litigantName: getPendingTaskPayload?.litigantName || selectedRepresentative?.additionalDetails?.fullName,
+        litigantName: getPendingTaskPayload?.litigantName || selectedRepresentative?.fullName,
       };
       return convertToFormData(t, newObject);
     }

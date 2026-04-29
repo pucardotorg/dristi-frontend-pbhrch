@@ -835,7 +835,7 @@ const TasksComponent = ({
                   {
                     ...responseDoc,
                     additionalDetails: {
-                      fileName: `Response (${data?.additionalDetails?.fullName})`,
+                      fileName: `Response (${data?.fullName})`,
                       fileType: "respondent-response",
                     },
                   },

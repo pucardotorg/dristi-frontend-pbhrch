@@ -25,7 +25,7 @@ async function applyDocketToDocument(
   courtCase,
   tenantId,
   requestInfo,
-  TEMP_FILES_DIR
+  TEMP_FILES_DIR,
 ) {
   if (!documentFileStoreId) {
     return null;
@@ -34,24 +34,24 @@ async function applyDocketToDocument(
   const filingPDFDocument = await convertFileStoreToDocument(
     tenantId,
     documentFileStoreId,
-    requestInfo
+    requestInfo,
   );
 
   // handling with multiple name and names are seperated by comma
   const complainants = courtCase.litigants.filter((litigant) =>
-    litigant.partyType.includes("complainant")
+    litigant.partyType.includes("complainant"),
   );
 
   const filteredRespondents =
     courtCase.litigants?.filter((litigant) =>
-      litigant.partyType.includes("respondent")
+      litigant.partyType.includes("respondent"),
     ) || [];
 
   const respondents =
     filteredRespondents.length > 0
       ? filteredRespondents
       : courtCase?.additionalDetails?.respondentDetails?.formdata?.map(
-          (item) => item?.data
+          (item) => item?.data,
         ) || [];
 
   const docketComplainantName = complainants
@@ -61,7 +61,7 @@ async function applyDocketToDocument(
 
   const docketAccusedName =
     respondents
-      ?.map((lit) => lit?.additionalDetails?.fullName)
+      ?.map((lit) => lit?.fullName)
       ?.filter(Boolean)
       ?.join(", ") ||
     respondents
@@ -69,7 +69,7 @@ async function applyDocketToDocument(
         ({ respondentFirstName, respondentMiddleName, respondentLastName }) =>
           [respondentFirstName, respondentMiddleName, respondentLastName]
             ?.filter(Boolean)
-            ?.join(" ")
+            ?.join(" "),
       )
       ?.filter(Boolean)
       ?.join(", ");
@@ -78,7 +78,7 @@ async function applyDocketToDocument(
     courtCase.courtId,
     "common-masters.Court_Rooms",
     tenantId,
-    requestInfo
+    requestInfo,
   ).then((mdmsRes) => {
     return mdmsRes.data.mdms.filter((x) => x.isActive).map((x) => x.data);
   });
@@ -102,22 +102,22 @@ async function applyDocketToDocument(
     tenantId,
     "docket-page",
     data,
-    { RequestInfo: requestInfo }
+    { RequestInfo: requestInfo },
   );
   const filingDocketPDFDocument = await PDFDocument.load(
     filingDocketPdfResponse.data,
-    { ignoreEncryption: true }
+    { ignoreEncryption: true },
   );
 
   const mergedDocumentWithDocket = await mergePDFDocuments(
     filingDocketPDFDocument,
-    filingPDFDocument
+    filingPDFDocument,
   );
   const mergedDocWithDocketFileStoreId = await persistPDF(
     mergedDocumentWithDocket,
     tenantId,
     requestInfo,
-    TEMP_FILES_DIR
+    TEMP_FILES_DIR,
   );
   return mergedDocWithDocketFileStoreId;
 }

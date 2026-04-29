@@ -347,7 +347,7 @@ function EFilingCases({ path }) {
 
   const caseDetails = useMemo(() => {
     const caseDetails = structuredClone(caseData?.criteria?.[0]?.responseList?.[0] || {});
-    const updatedCaseData = transformCaseDataForFetching(caseDetails, ["witnessDetails", "advocateDetails"]);
+    const updatedCaseData = transformCaseDataForFetching(caseDetails, ["witnessDetails", "advocateDetails", "complainantDetails"]);
     return updatedCaseData;
   }, [caseData]);
 
@@ -530,15 +530,8 @@ function EFilingCases({ path }) {
 
     if (currentCaseDetails && Object.keys(currentCaseDetails).length !== 0) {
       const fieldsRemainingCopy = structuredClone(fieldsRemaining);
-      const additionalDetailsArray = [
-        "complainantDetails",
-        "respondentDetails",
-        "witnessDetails",
-        "prayerSwornStatement",
-        "advocateDetails",
-        "processCourierService",
-      ];
-      const caseDetailsArray = ["chequeDetails", "debtLiabilityDetails", "demandNoticeDetails", "delayApplications"];
+      const additionalDetailsArray = ["complainantDetails", "respondentDetails", "witnessDetails", "advocateDetails", "processCourierService"];
+      const caseDetailsArray = ["chequeDetails", "debtLiabilityDetails", "demandNoticeDetails", "delayApplications", "prayerSwornStatement"];
 
       for (const key of additionalDetailsArray) {
         if (currentCaseDetails?.additionalDetails?.[key]) {
@@ -1516,8 +1509,7 @@ function EFilingCases({ path }) {
             });
           });
           const scrutinyFormLength = scrutiny?.[selected]?.form?.length || 0;
-          const SelectUploadDocLength =
-            caseDetails?.additionalDetails?.prayerSwornStatement?.formdata?.[0]?.data?.SelectUploadDocWithName?.length || 0;
+          const SelectUploadDocLength = caseDetails?.caseDetails?.prayerSwornStatement?.formdata?.[0]?.data?.SelectUploadDocWithName?.length || 0;
           let updatedBody = [];
           if (Object.keys(scrutinyObj).length > 0 || isPendingESign || isPendingReESign) {
             updatedBody = config.body
@@ -2934,7 +2926,7 @@ function EFilingCases({ path }) {
                   totalErrorCount={totalErrors.total}
                   totalWarningCount={totalErrors.warningErrors}
                   pages={errorPages}
-                  handlePageChange={handlePageChange}
+                  // handlePageChange={handlePageChange}
                   showConfirmModal={confirmModalConfig ? true : false}
                   handleGoToPage={handleGoToPage}
                   selected={selected}
@@ -2990,7 +2982,7 @@ function EFilingCases({ path }) {
                 <Accordion
                   t={t}
                   title={item.title}
-                  handlePageChange={handlePageChange}
+                  // handlePageChange={handlePageChange}
                   handleAccordionClick={() => {
                     handleAccordionClick(isEditingAllowed ? index : accordion.length - 1);
                   }}
@@ -3014,7 +3006,7 @@ function EFilingCases({ path }) {
             <Accordion
               t={t}
               title={item.title}
-              handlePageChange={handlePageChange}
+              // handlePageChange={handlePageChange}
               handleAccordionClick={() => {
                 handleAccordionClick(isEditingAllowed ? index : accordion.length - 1);
               }}
@@ -3131,7 +3123,7 @@ function EFilingCases({ path }) {
                     label={showActionsLabels && actionName}
                     config={config}
                     onSubmit={() => onSubmit("SAVE_DRAFT")}
-                    onSecondayActionClick={onSaveDraft}
+                    // onSecondayActionClick={onSaveDraft}
                     defaultValues={getDefaultValues(index)}
                     onFormValueChange={(setValue, formData, formState, reset, setError, clearErrors, trigger, getValues) => {
                       onFormValueChange(
@@ -3150,8 +3142,8 @@ function EFilingCases({ path }) {
                     isDisabled={isSubmitDisabled}
                     cardStyle={{ minWidth: "100%" }}
                     cardClassName={`e-filing-card-form-style ${pageConfig.className}`}
-                    secondaryLabel={t("CS_SAVE_DRAFT")}
-                    showSecondaryLabel={isDraftInProgress}
+                    // secondaryLabel={t("CS_SAVE_DRAFT")}
+                    // showSecondaryLabel={isDraftInProgress}
                     actionClassName="e-filing-action-bar"
                     className={`${pageConfig.className} ${getFormClassName()}`}
                     noBreakLine
@@ -3303,9 +3295,9 @@ function EFilingCases({ path }) {
             submitIcon={<RightArrow />}
             onSubmit={() => onSubmit("SAVE_DRAFT")}
           />
-          {!(isCaseReAssigned || isPendingReESign) && (
+          {/* {!(isCaseReAssigned || isPendingReESign) && (
             <Button className="previous-button" variation="secondary" label={t("CS_SAVE_DRAFT")} onButtonClick={onSaveDraft} />
-          )}
+          )} */}
         </ActionBar>
       )}
 

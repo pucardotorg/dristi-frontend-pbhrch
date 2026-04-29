@@ -12,12 +12,11 @@ This guide documents how to integrate all extracted hooks and components back in
 2. **useCitizenActions** - Citizen-specific actions
 3. **useEmployeeActions** - Employee-specific actions
 4. **useUserContext** - User info, roles, permissions (already existed)
-5. **useCaseParties** - Litigants, representatives extraction (already existed)
-6. **useApplicationFilters** - Application filtering (already existed)
-7. **useInboxData** - Inbox fetching (already existed)
-8. **useEvidenceActions** - Evidence mutations (already existed)
-9. **useHearingNavigation** - Hearing navigation (already existed)
-10. **useToast** - Toast notifications (already existed)
+5. **useApplicationFilters** - Application filtering (already existed)
+6. **useInboxData** - Inbox fetching (already existed)
+7. **useEvidenceActions** - Evidence mutations (already existed)
+8. **useHearingNavigation** - Hearing navigation (already existed)
+9. **useToast** - Toast notifications (already existed)
 
 ### Modal Components (in `components/` directory)
 
@@ -37,21 +36,20 @@ This guide documents how to integrate all extracted hooks and components back in
 
 1. **constants.js** - All constants
 2. **caseDataProcessingUtils.js** - Data transformation utilities
-3. **partyUtils.js** - Party name utilities
-4. **actionOptionsUtils.js** - Action options utilities
-5. **permissionMappings.js** - Permission and action options mapping
-6. **breadcrumbUtils.js** - Breadcrumb and advocate name utilities
-7. **partyFilterUtils.js** - Party filtering utilities
-8. **modalConfigUtils.js** - Modal configuration utilities
-9. **caseInfoUtils.js** - Case info building utilities
-10. **tabConfigUtils.js** - Tab configuration utilities
-11. **advocateClerkUtils.js** - Advocate/clerk membership utilities
-12. **caseSubmissionUtils.js** - Case submission handling utilities
-13. **deleteHandlers.js** - Delete operation handlers
-14. **bailBondUtils.js** - Bail bond utilities
-15. **componentUtils.js** - Heading, CloseBtn components
-16. **pdfDownloadUtils.js** - PDF download utilities
-17. **toastUtils.js** - Toast helper utilities
+3. **actionOptionsUtils.js** - Action options utilities
+4. **permissionMappings.js** - Permission and action options mapping
+5. **breadcrumbUtils.js** - Breadcrumb and advocate name utilities
+6. **partyFilterUtils.js** - Party filtering utilities
+7. **modalConfigUtils.js** - Modal configuration utilities
+8. **caseInfoUtils.js** - Case info building utilities
+9. **tabConfigUtils.js** - Tab configuration utilities
+10. **advocateClerkUtils.js** - Advocate/clerk membership utilities
+11. **caseSubmissionUtils.js** - Case submission handling utilities
+12. **deleteHandlers.js** - Delete operation handlers
+13. **bailBondUtils.js** - Bail bond utilities
+14. **componentUtils.js** - Heading, CloseBtn components
+15. **pdfDownloadUtils.js** - PDF download utilities
+16. **toastUtils.js** - Toast helper utilities
 
 ## Integration Steps for AdmittedCaseV2.js
 

@@ -17,7 +17,7 @@ export const getAdvocatesNames = (caseDetails) => {
     if (list?.length > 0) {
       litigants[litigant?.additionalDetails?.uuid] = list;
     } else {
-      litigants[litigant?.additionalDetails?.uuid] = [litigant?.additionalDetails?.fullName, ...(poaHolder?.length > 0 ? poaHolder : [])];
+      litigants[litigant?.additionalDetails?.uuid] = [litigant?.fullName, ...(poaHolder?.length > 0 ? poaHolder : [])];
     }
   });
   return litigants;
@@ -27,7 +27,7 @@ export const getuuidNameMap = (caseDetails) => {
   return caseDetails?.representatives?.reduce((acc, item) => {
     acc[item?.additionalDetails?.uuid] = item?.additionalDetails?.advocateName;
     item?.representing?.forEach((rep) => {
-      acc[rep?.additionalDetails?.uuid] = rep?.additionalDetails?.fullName;
+      acc[rep?.additionalDetails?.uuid] = rep?.fullName;
     });
     return acc;
   }, {});

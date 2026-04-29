@@ -1398,7 +1398,7 @@ export const UICustomizations = {
             const finalLitigantsData = litigants.map((litigant) => {
               return {
                 ...litigant,
-                name: removeInvalidNameParts(litigant.additionalDetails?.fullName),
+                name: removeInvalidNameParts(litigant?.fullName),
                 isEditable,
                 ...(isEditable && { isAdvocateEditor }),
               };
@@ -1415,7 +1415,7 @@ export const UICustomizations = {
               return {
                 ...poaHolder,
                 representingLitigants: representing,
-                representingList: representing?.map((rep) => rep?.additionalDetails?.fullName)?.join(", "),
+                representingList: representing?.map((rep) => rep?.fullName)?.join(", "),
                 partyType: poaHolder?.poaType,
                 status: "JOINED",
                 isEditable: false,
@@ -1445,7 +1445,7 @@ export const UICustomizations = {
                 ...rep,
                 name: rep.additionalDetails?.advocateName,
                 partyType: `ADVOCATE`,
-                representingList: rep.representing?.map((client) => removeInvalidNameParts(client?.additionalDetails?.fullName))?.join(", "),
+                representingList: rep.representing?.map((client) => removeInvalidNameParts(client?.fullName))?.join(", "),
                 isEditable: false,
                 status,
               };

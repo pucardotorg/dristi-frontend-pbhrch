@@ -245,24 +245,24 @@ const SubmissionsCreate = ({ path }) => {
     if (isAdvocateLoggedIn) {
       return isAdvocateLoggedIn?.representing?.map((r) => {
         return {
-          code: r?.additionalDetails?.fullName,
-          name: r?.additionalDetails?.fullName,
+          code: r?.fullName,
+          name: r?.fullName,
           uuid: r?.additionalDetails?.uuid,
         };
       });
     } else if (isPipLoggedIn) {
       return [
         {
-          code: isPipLoggedIn?.additionalDetails?.fullName,
-          name: isPipLoggedIn?.additionalDetails?.fullName,
+          code: isPipLoggedIn?.fullName,
+          name: isPipLoggedIn?.fullName,
           uuid: isPipLoggedIn?.additionalDetails?.uuid,
         },
       ];
     } else if (accusedLoggedIn) {
       return [
         {
-          code: accusedLoggedIn?.additionalDetails?.fullName,
-          name: accusedLoggedIn?.additionalDetails?.fullName,
+          code: accusedLoggedIn?.fullName,
+          name: accusedLoggedIn?.fullName,
           uuid: accusedLoggedIn?.additionalDetails?.uuid,
         },
       ];
@@ -313,7 +313,7 @@ const SubmissionsCreate = ({ path }) => {
 
   const fullName = useMemo(() => {
     return (
-      caseDetails?.litigants?.find((litigant) => litigant?.additionalDetails?.uuid === authorizedUuid)?.additionalDetails?.fullName ||
+      caseDetails?.litigants?.find((litigant) => litigant?.additionalDetails?.uuid === authorizedUuid)?.fullName ||
       caseDetails?.representatives?.find((rep) => rep?.additionalDetails?.uuid === authorizedUuid)?.additionalDetails?.advocateName ||
       ""
     );

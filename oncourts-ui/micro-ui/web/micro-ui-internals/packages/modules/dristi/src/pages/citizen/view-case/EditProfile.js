@@ -18,7 +18,7 @@ import {
 } from "./editProfileValidationUtils";
 import { editComplainantDetailsConfig } from "./Config/editComplainantDetailsConfig";
 import { editRespondentConfig } from "./Config/editRespondentConfig";
-import { getAdvocates } from "../FileCase/EfilingValidationUtils";
+import { getAdvocates, transformCaseDataForFetching } from "../FileCase/EfilingValidationUtils";
 import { DRISTIService } from "../../../services";
 import { Urls } from "../../../hooks";
 import { CloseBtn, Heading } from "../../../components/ModalComponents";
@@ -65,12 +65,11 @@ const EditProfile = ({ path }) => {
     Boolean(caseId)
   );
 
-  const caseDetails = useMemo(
-    () => ({
-      ...caseData?.criteria?.[0]?.responseList?.[0],
-    }),
-    [caseData]
-  );
+  const caseDetails = useMemo(() => {
+    const caseDetails = structuredClone(caseData?.criteria?.[0]?.responseList?.[0] || {});
+    const updatedCaseData = transformCaseDataForFetching(caseDetails, ["witnessDetails", "advocateDetails", "complainantDetails"]);
+    return updatedCaseData;
+  }, [caseData]);
 
   const { data: individualData } = window?.Digit.Hooks.dristi.useGetIndividualUser(
     {

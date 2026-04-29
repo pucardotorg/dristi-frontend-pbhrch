@@ -4,7 +4,7 @@ import { CustomArrowDownIcon, CustomCompleteIcon, CustomSchedule } from "../icon
 function Accordion({
   t,
   title,
-  handlePageChange,
+  handlePageChange = () => {},
   handleAccordionClick,
   children,
   parentIndex,

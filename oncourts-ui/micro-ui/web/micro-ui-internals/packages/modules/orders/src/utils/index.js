@@ -131,7 +131,7 @@ export const getComplainantName = (complainantDetails) => {
   if (complainantDetails?.complainantType?.code === "INDIVIDUAL") {
     return partyName;
   }
-  return `${complainantDetails?.complainantCompanyName} (Represented By ${partyName})` || "";
+  return `${complainantDetails?.companyName} (Represented By ${partyName})` || "";
 };
 
 export const numberToWords = (num) => {

@@ -1,4 +1,4 @@
-import { removeInvalidNameParts } from "./partyUtils";
+import { removeInvalidNameParts } from "../../../../Utils";
 
 // Helper function to configure tab-specific settings based on tab label
 export const getTabConfig = ({

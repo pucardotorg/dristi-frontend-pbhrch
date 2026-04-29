@@ -1,5 +1,4 @@
 export { default as useUserContext } from "./useUserContext";
-export { default as useCaseParties } from "./useCaseParties";
 export { default as useApplicationFilters } from "./useApplicationFilters";
 export { default as useInboxData } from "./useInboxData";
 export { default as useEvidenceActions } from "./useEvidenceActions";

@@ -19,25 +19,25 @@ async function processBailDocuments(
   requestInfo,
   TEMP_FILES_DIR,
   indexCopy,
-  messagesMap
+  messagesMap,
 ) {
   const bailApplicationSection = filterCaseBundleBySection(
     caseBundleMaster,
-    "baildocument"
+    "baildocument",
   );
 
   const bailBondSection = filterCaseBundleBySection(
     caseBundleMaster,
-    "bailbond"
+    "bailbond",
   );
 
   const sectionPosition = indexCopy.sections?.findIndex(
-    (s) => s.name === "baildocument"
+    (s) => s.name === "baildocument",
   );
 
   const dynamicSectionNumber = getDynamicSectionNumber(
     indexCopy,
-    sectionPosition
+    sectionPosition,
   );
 
   const bailApplicationsLineItems = [];
@@ -58,7 +58,7 @@ async function processBailDocuments(
         sortBy: section.sorton,
         order: "asc",
         limit: 100,
-      }
+      },
     );
 
     const applicationList = bailApplications?.data?.applicationList;
@@ -85,7 +85,7 @@ async function processBailDocuments(
               fileStores,
               tenantId,
               requestInfo,
-              TEMP_FILES_DIR
+              TEMP_FILES_DIR,
             );
             let newApplicationFileStoreId = combinedFileStore;
 
@@ -93,18 +93,17 @@ async function processBailDocuments(
               const sourceUuid = application.auditDetails.createdBy;
 
               const sourceLitigant = courtCase.litigants?.find(
-                (litigant) => litigant.additionalDetails.uuid === sourceUuid
+                (litigant) => litigant.additionalDetails.uuid === sourceUuid,
               );
               const sourceRepresentative = courtCase.representatives?.find(
-                (rep) => rep.additionalDetails.uuid === sourceUuid
+                (rep) => rep.additionalDetails.uuid === sourceUuid,
               );
 
               let docketNameOfFiling;
               let docketCounselFor;
 
               if (sourceLitigant) {
-                docketNameOfFiling =
-                  sourceLitigant.additionalDetails?.fullName || "";
+                docketNameOfFiling = sourceLitigant.fullName || "";
                 docketCounselFor = "";
               } else if (sourceRepresentative) {
                 const docketNameOfComplainants =
@@ -114,7 +113,7 @@ async function processBailDocuments(
                     .join(", ");
                 const partyType =
                   sourceRepresentative.representing[0].partyType.includes(
-                    "complainant"
+                    "complainant",
                   )
                     ? "COMPLAINANT"
                     : "ACCUSED";
@@ -123,15 +122,16 @@ async function processBailDocuments(
                 docketCounselFor = `COUNSEL FOR THE ${partyType} - ${docketNameOfComplainants}`;
               } else {
                 const complainant = courtCase.litigants?.find((litigant) =>
-                  litigant.partyType.includes("complainant.primary")
+                  litigant.partyType.includes("complainant.primary"),
                 );
                 const docketNameOfComplainants =
                   complainant.additionalDetails.fullName;
                 docketNameOfFiling =
                   courtCase.representatives?.find((adv) =>
                     adv.representing?.find(
-                      (party) => party.individualId === complainant.individualId
-                    )
+                      (party) =>
+                        party.individualId === complainant.individualId,
+                    ),
                   )?.additionalDetails?.advocateName ||
                   docketNameOfComplainants;
                 docketCounselFor =
@@ -157,14 +157,14 @@ async function processBailDocuments(
                   docketCounselFor: docketCounselFor,
                   docketNameOfFiling: docketNameOfFiling,
                   docketDateOfSubmission: new Date(
-                    application.createdDate
+                    application.createdDate,
                   ).toLocaleDateString("en-IN"),
                   documentPath: documentPath,
                 },
                 courtCase,
                 tenantId,
                 requestInfo,
-                TEMP_FILES_DIR
+                TEMP_FILES_DIR,
               );
             }
 
@@ -190,7 +190,7 @@ async function processBailDocuments(
                   applicationType: "SUBMIT_BAIL_DOCUMENTS",
                   status: "COMPLETED",
                   tenantId,
-                }
+                },
               );
               const submitBailApplications =
                 resApplications?.data?.applicationList;
@@ -215,7 +215,7 @@ async function processBailDocuments(
                   fileStores,
                   tenantId,
                   requestInfo,
-                  TEMP_FILES_DIR
+                  TEMP_FILES_DIR,
                 );
                 let newFileStoreId = combinedFileStore;
 
@@ -224,18 +224,18 @@ async function processBailDocuments(
                     submitBailApplication.auditDetails.createdBy;
 
                   const sourceLitigant = courtCase.litigants?.find(
-                    (litigant) => litigant.additionalDetails.uuid === sourceUuid
+                    (litigant) =>
+                      litigant.additionalDetails.uuid === sourceUuid,
                   );
                   const sourceRepresentative = courtCase.representatives?.find(
-                    (rep) => rep.additionalDetails.uuid === sourceUuid
+                    (rep) => rep.additionalDetails.uuid === sourceUuid,
                   );
 
                   let docketNameOfFiling;
                   let docketCounselFor;
 
                   if (sourceLitigant) {
-                    docketNameOfFiling =
-                      sourceLitigant.additionalDetails?.fullName || "";
+                    docketNameOfFiling = sourceLitigant.fullName || "";
                     docketCounselFor = "";
                   } else if (sourceRepresentative) {
                     const docketNameOfComplainants =
@@ -245,7 +245,7 @@ async function processBailDocuments(
                         ?.join(", ");
                     const partyType =
                       sourceRepresentative.representing[0].partyType.includes(
-                        "complainant"
+                        "complainant",
                       )
                         ? "COMPLAINANT"
                         : "ACCUSED";
@@ -255,7 +255,7 @@ async function processBailDocuments(
                     docketCounselFor = `COUNSEL FOR THE ${partyType} - ${docketNameOfComplainants}`;
                   } else {
                     const complainant = courtCase.litigants?.find((litigant) =>
-                      litigant.partyType.includes("complainant.primary")
+                      litigant.partyType.includes("complainant.primary"),
                     );
                     const docketNameOfComplainants =
                       complainant.additionalDetails.fullName;
@@ -263,8 +263,8 @@ async function processBailDocuments(
                       courtCase.representatives?.find((adv) =>
                         adv.representing?.find(
                           (party) =>
-                            party.individualId === complainant.individualId
-                        )
+                            party.individualId === complainant.individualId,
+                        ),
                       )?.additionalDetails?.advocateName ||
                       docketNameOfComplainants;
                     docketCounselFor =
@@ -290,21 +290,21 @@ async function processBailDocuments(
                       docketCounselFor: docketCounselFor,
                       docketNameOfFiling: docketNameOfFiling,
                       docketDateOfSubmission: new Date(
-                        submitBailApplication.createdDate
+                        submitBailApplication.createdDate,
                       ).toLocaleDateString("en-IN"),
                       documentPath: documentPath,
                     },
                     courtCase,
                     tenantId,
                     requestInfo,
-                    TEMP_FILES_DIR
+                    TEMP_FILES_DIR,
                   );
                 }
                 newApplicationFileStoreId = await combineMultipleFilestores(
                   [newApplicationFileStoreId, newFileStoreId],
                   tenantId,
                   requestInfo,
-                  TEMP_FILES_DIR
+                  TEMP_FILES_DIR,
                 );
               }
             }
@@ -319,11 +319,11 @@ async function processBailDocuments(
           } else {
             return null;
           }
-        })
+        }),
       );
       bailApplicationsLineItems.push(...innerLineItems?.filter(Boolean));
       const bailDocumentIndexSection = indexCopy.sections?.find(
-        (section) => section.name === "baildocument"
+        (section) => section.name === "baildocument",
       );
       bailDocumentIndexSection.lineItems =
         bailApplicationsLineItems?.filter(Boolean);
@@ -347,7 +347,7 @@ async function processBailDocuments(
         sortBy: section.sorton,
         order: "asc",
         limit: 100,
-      }
+      },
     );
 
     const bailBondList = bailBond?.data?.bails;
@@ -381,7 +381,7 @@ async function processBailDocuments(
               fileStores,
               tenantId,
               requestInfo,
-              TEMP_FILES_DIR
+              TEMP_FILES_DIR,
             );
             let newBailBondFileStoreId = combinedFileStore;
 
@@ -389,18 +389,17 @@ async function processBailDocuments(
               const sourceUuid = bailBond.auditDetails.createdBy;
 
               const sourceLitigant = courtCase.litigants?.find(
-                (litigant) => litigant.additionalDetails.uuid === sourceUuid
+                (litigant) => litigant.additionalDetails.uuid === sourceUuid,
               );
               const sourceRepresentative = courtCase.representatives?.find(
-                (rep) => rep.additionalDetails.uuid === sourceUuid
+                (rep) => rep.additionalDetails.uuid === sourceUuid,
               );
 
               let docketNameOfFiling;
               let docketCounselFor;
 
               if (sourceLitigant) {
-                docketNameOfFiling =
-                  sourceLitigant.additionalDetails?.fullName || "";
+                docketNameOfFiling = sourceLitigant.fullName || "";
                 docketCounselFor = "";
               } else if (sourceRepresentative) {
                 const docketNameOfComplainants =
@@ -410,7 +409,7 @@ async function processBailDocuments(
                     ?.join(", ");
                 const partyType =
                   sourceRepresentative.representing[0].partyType?.includes(
-                    "complainant"
+                    "complainant",
                   )
                     ? "COMPLAINANT"
                     : "ACCUSED";
@@ -419,15 +418,16 @@ async function processBailDocuments(
                 docketCounselFor = `COUNSEL FOR THE ${partyType} - ${docketNameOfComplainants}`;
               } else {
                 const complainant = courtCase.litigants?.find((litigant) =>
-                  litigant.partyType.includes("complainant.primary")
+                  litigant.partyType.includes("complainant.primary"),
                 );
                 const docketNameOfComplainants =
                   complainant.additionalDetails.fullName;
                 docketNameOfFiling =
                   courtCase.representatives?.find((adv) =>
                     adv.representing?.find(
-                      (party) => party.individualId === complainant.individualId
-                    )
+                      (party) =>
+                        party.individualId === complainant.individualId,
+                    ),
                   )?.additionalDetails?.advocateName ||
                   docketNameOfComplainants;
                 docketCounselFor =
@@ -457,14 +457,14 @@ async function processBailDocuments(
                   docketCounselFor: docketCounselFor,
                   docketNameOfFiling: docketNameOfFiling,
                   docketDateOfSubmission: new Date(
-                    bailBond.auditDetails.createdTime
+                    bailBond.auditDetails.createdTime,
                   ).toLocaleDateString("en-IN"),
                   documentPath: documentPath,
                 },
                 courtCase,
                 tenantId,
                 requestInfo,
-                TEMP_FILES_DIR
+                TEMP_FILES_DIR,
               );
             }
 
@@ -478,11 +478,11 @@ async function processBailDocuments(
           } else {
             return null;
           }
-        })
+        }),
       );
       bailBondLineItems.push(...innerLineItems?.filter(Boolean));
       const bailDocumentIndexSection = indexCopy.sections?.find(
-        (section) => section.name === "baildocument"
+        (section) => section.name === "baildocument",
       );
       // Append bail bond line items to existing bail application line items instead of overwriting
       bailDocumentIndexSection.lineItems = [
@@ -493,7 +493,7 @@ async function processBailDocuments(
   }
   if (bailApplicationSection?.length === 0 && bailBondSection?.length === 0) {
     const bailDocumentIndexSection = indexCopy?.sections?.find(
-      (section) => section.name === "baildocument"
+      (section) => section.name === "baildocument",
     );
     bailDocumentIndexSection.lineItems = [];
   }

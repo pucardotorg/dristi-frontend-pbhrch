@@ -28,7 +28,7 @@ export const getPipAccuseds = (caseDetails) => {
 // Returns list of parties that the logged-in user represents or is part of
 export const getComplainantsList = (caseDetails, pipComplainants, pipAccuseds, authorizedUuid) => {
   const loggedinUserUuid = authorizedUuid;
-  
+
   // If logged in person is an advocate/jr. adv/clerk (office member of senior advocate)
   const isAdvocateLoggedIn = caseDetails?.representatives?.find((rep) => rep?.additionalDetails?.uuid === loggedinUserUuid);
   const isPipLoggedIn = pipComplainants?.find((p) => p?.additionalDetails?.uuid === loggedinUserUuid);
@@ -37,24 +37,24 @@ export const getComplainantsList = (caseDetails, pipComplainants, pipAccuseds, a
   if (isAdvocateLoggedIn) {
     return isAdvocateLoggedIn?.representing?.map((r) => {
       return {
-        code: r?.additionalDetails?.fullName,
-        name: r?.additionalDetails?.fullName,
+        code: r?.fullName,
+        name: r?.fullName,
         uuid: r?.additionalDetails?.uuid,
       };
     });
   } else if (isPipLoggedIn) {
     return [
       {
-        code: isPipLoggedIn?.additionalDetails?.fullName,
-        name: isPipLoggedIn?.additionalDetails?.fullName,
+        code: isPipLoggedIn?.fullName,
+        name: isPipLoggedIn?.fullName,
         uuid: isPipLoggedIn?.additionalDetails?.uuid,
       },
     ];
   } else if (accusedLoggedIn) {
     return [
       {
-        code: accusedLoggedIn?.additionalDetails?.fullName,
-        name: accusedLoggedIn?.additionalDetails?.fullName,
+        code: accusedLoggedIn?.fullName,
+        name: accusedLoggedIn?.fullName,
         uuid: accusedLoggedIn?.additionalDetails?.uuid,
       },
     ];

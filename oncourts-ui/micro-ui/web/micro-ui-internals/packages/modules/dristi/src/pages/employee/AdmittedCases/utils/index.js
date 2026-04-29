@@ -1,6 +1,5 @@
 export * from "./constants";
 export * from "./caseDataUtils";
-export * from "./partyUtils";
 export * from "./actionOptionsUtils";
 export * from "./permissionMappings";
 export * from "./breadcrumbUtils";

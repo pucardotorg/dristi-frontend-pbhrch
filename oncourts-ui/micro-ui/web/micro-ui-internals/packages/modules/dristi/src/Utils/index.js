@@ -591,7 +591,7 @@ export const getComplainants = (caseDetails) => {
     caseDetails?.litigants
       ?.filter((item) => item?.partyType?.includes("complainant"))
       ?.map((item) => {
-        const fullName = removeInvalidNameParts(item?.additionalDetails?.fullName);
+        const fullName = removeInvalidNameParts(item?.fullName);
         const poaHolder = caseDetails?.poaHolders?.find((poa) => poa?.individualId === item?.individualId);
         if (poaHolder) {
           return {
@@ -616,7 +616,7 @@ export const getComplainantsSidePoAHolders = (caseDetails, complainants) => {
     caseDetails?.poaHolders
       ?.filter((item) => item?.representingLitigants?.every((rep) => complainants?.find((c) => c?.individualId === rep?.individualId)))
       ?.map((item) => {
-        const fullName = removeInvalidNameParts(item?.name);
+        const fullName = removeInvalidNameParts(item?.fullName);
         return {
           name: `${fullName} (PoA Holder)`,
           partyUuid: item?.additionalDetails?.uuid,

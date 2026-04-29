@@ -45,7 +45,7 @@ async function applicationRescheduleHearing(
   res,
   qrCode,
   application,
-  courtCaseJudgeDetails
+  courtCaseJudgeDetails,
 ) {
   const cnrNumber = req.query.cnrNumber;
   const applicationNumber = req.query.applicationNumber;
@@ -66,7 +66,7 @@ async function applicationRescheduleHearing(
     return renderError(
       res,
       `${missingFields.join(", ")} are mandatory to generate the PDF`,
-      400
+      400,
     );
   }
 
@@ -84,7 +84,7 @@ async function applicationRescheduleHearing(
     // Search for case details
     const resCase = await handleApiCall(
       () => search_case(cnrNumber, tenantId, requestInfo, application?.courtId),
-      "Failed to query case service"
+      "Failed to query case service",
     );
     const courtCase = resCase?.data?.criteria[0]?.responseList[0];
     if (!courtCase) {
@@ -97,15 +97,15 @@ async function applicationRescheduleHearing(
           tenantId,
           "rainmaker-submissions,rainmaker-common",
           "en_IN",
-          requestInfo
+          requestInfo,
         ),
-      "Failed to query Localized messages"
+      "Failed to query Localized messages",
     );
     const messages = resMessage?.data?.messages || [];
     const messagesMap =
       messages?.length > 0
         ? Object.fromEntries(
-            messages.map(({ code, message }) => [code, message])
+            messages.map(({ code, message }) => [code, message]),
           )
         : {};
 
@@ -116,11 +116,11 @@ async function applicationRescheduleHearing(
     if (advocateIndividualId) {
       const resAdvocate = await handleApiCall(
         () => search_advocate(tenantId, advocateIndividualId, requestInfo),
-        "Failed to query Advocate Details"
+        "Failed to query Advocate Details",
       );
       const advocateData = resAdvocate?.data?.advocates?.[0];
       const advocateDetails = advocateData?.responseList?.find(
-        (item) => item.isActive === true
+        (item) => item.isActive === true,
       );
       advocateName =
         cleanName(advocateDetails?.additionalDetails?.username) || "";
@@ -135,9 +135,9 @@ async function applicationRescheduleHearing(
             tenantId,
             code,
             entityId,
-            requestInfo
+            requestInfo,
           ),
-        "Failed to query sunbirdrc credential service"
+        "Failed to query sunbirdrc credential service",
       );
       const $ = cheerio.load(resCredential.data);
       const imgTag = $("img");
@@ -145,7 +145,7 @@ async function applicationRescheduleHearing(
         return renderError(
           res,
           "No img tag found in the sunbirdrc response",
-          500
+          500,
         );
       }
       base64Url = imgTag.attr("src");
@@ -157,28 +157,20 @@ async function applicationRescheduleHearing(
         courtCase?.representatives?.filter((rep) =>
           rep?.representing?.some(
             (complainant) =>
-              complainant?.individualId === litigant?.individualId
-          )
+              complainant?.individualId === litigant?.individualId,
+          ),
         ) || [],
     }));
 
     const complainants =
       litigants?.filter((litigant) =>
-        litigant.partyType.includes("complainant")
+        litigant.partyType.includes("complainant"),
       ) || [];
 
     const complainantList = complainants?.map((complainant) => {
-      const complainantInAdditionalDetails =
-        courtCase?.additionalDetails?.complainantDetails?.formdata?.find(
-          (comp) =>
-            comp?.data?.complainantVerification?.individualDetails
-              ?.individualId === complainant?.individualId
-        );
-      const address = getStringAddressDetails(
-        complainantInAdditionalDetails?.data?.addressDetails
-      );
+      const address = getStringAddressDetails(complainant?.permanentAddress);
       return {
-        name: complainant?.additionalDetails?.fullName,
+        name: complainant?.fullName,
         address: address,
         listOfAdvocatesRepresenting: complainant?.representatives
           ?.map((rep) => rep?.additionalDetails?.advocateName)
@@ -193,7 +185,7 @@ async function applicationRescheduleHearing(
           courtCase?.additionalDetails?.respondentDetails?.formdata?.find(
             (comp) =>
               comp?.data?.respondentVerification?.individualDetails
-                ?.individualId === accused?.individualId
+                ?.individualId === accused?.individualId,
           );
         const addresses = (
           accusedInAdditionalDetails?.data?.addressDetails || []
@@ -203,7 +195,7 @@ async function applicationRescheduleHearing(
         return {
           displayIndex: accusedInAdditionalDetails?.displayindex + 1 ?? null,
           individualId: accused?.individualId,
-          name: accused?.additionalDetails?.fullName,
+          name: accused?.fullName,
           address: addresses?.join(", ") || "",
           listOfAdvocatesRepresenting: accused?.representatives
             ?.map((rep) => rep?.additionalDetails?.advocateName)
@@ -237,13 +229,13 @@ async function applicationRescheduleHearing(
               (joined) =>
                 joined?.individualId &&
                 unJoined?.individualId &&
-                joined?.individualId === unJoined?.individualId
-            )
+                joined?.individualId === unJoined?.individualId,
+            ),
         ) || [];
 
     const accusedList = [...joinedAccuseds, ...unJoinedAccuseds]
       .sort(
-        (a, b) => (a.displayIndex ?? Infinity) - (b.displayIndex ?? Infinity)
+        (a, b) => (a.displayIndex ?? Infinity) - (b.displayIndex ?? Infinity),
       )
       .map(({ displayIndex, ...rest }) => rest);
 
@@ -289,7 +281,7 @@ async function applicationRescheduleHearing(
       messagesMap?.[purposeOfHearing] || purposeOfHearing;
     const onBehalfOfuuid = application?.onBehalfOf?.[0];
     const onBehalfOfLitigent = courtCase?.litigants?.find(
-      (item) => item.additionalDetails.uuid === onBehalfOfuuid
+      (item) => item.additionalDetails.uuid === onBehalfOfuuid,
     );
 
     let partyType = "Court";
@@ -337,7 +329,7 @@ async function applicationRescheduleHearing(
         : config.pdf.application_reschedule_hearing;
     const pdfResponse = await handleApiCall(
       () => create_pdf(tenantId, pdfKey, data, req.body),
-      "Failed to generate PDF of Reschedule Hearing Application"
+      "Failed to generate PDF of Reschedule Hearing Application",
     );
     const filename = `${pdfKey}_${new Date().getTime()}`;
     res.writeHead(200, {
@@ -357,7 +349,7 @@ async function applicationRescheduleHearing(
       res,
       "Failed to query details of APPLICATION FOR EXTENSION OF SUBMISSION DEADLINE",
       500,
-      ex
+      ex,
     );
   }
 }

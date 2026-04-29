@@ -158,7 +158,7 @@ const WitnessDrawerV2 = ({
             name: `${rep?.additionalDetails?.advocateName} (Advocate)`,
             partyType: `ADVOCATE`,
             uuid: rep?.additionalDetails?.uuid,
-            representingList: rep?.representing?.map((client) => removeInvalidNameParts(client?.additionalDetails?.fullName))?.join(", "),
+            representingList: rep?.representing?.map((client) => removeInvalidNameParts(client?.fullName))?.join(", "),
             mobileNumbers: mobileNumber ? [mobileNumber] : [],
             sourceName: rep?.additionalDetails?.advocateName,
             address: address || "",
@@ -183,7 +183,7 @@ const WitnessDrawerV2 = ({
         caseDetails?.litigants
           ?.filter((item) => item?.partyType?.includes("respondent"))
           .map(async (item) => {
-            const fullName = removeInvalidNameParts(item?.additionalDetails?.fullName);
+            const fullName = removeInvalidNameParts(item?.fullName);
             const userData = caseDetails?.additionalDetails?.respondentDetails?.formdata?.find(
               (obj) => obj?.data?.respondentVerification?.individualDetails?.individualId === item?.individualId
             );
@@ -287,16 +287,12 @@ const WitnessDrawerV2 = ({
       caseDetails?.litigants
         ?.filter((item) => item?.partyType?.includes("complainant"))
         ?.map((item) => {
-          const fullName = removeInvalidNameParts(item?.additionalDetails?.fullName);
-          const poaHolder = caseDetails?.poaHolders?.find((poa) => poa?.individualId === item?.individualId);
-          if (poaHolder) {
-            const userData = caseDetails?.additionalDetails?.complainantDetails?.formdata?.find(
-              (data) => data?.data?.poaVerification?.individualDetails?.individualId === item?.individualId
-            )?.data;
-
-            const mobileNumber = userData?.poaVerification?.mobileNumber;
-            const age = userData?.poaAge || "";
-            const address = formatAddress(userData?.poaAddressDetails);
+          const fullName = removeInvalidNameParts(item?.fullName);
+          const complainantPoaHolder = caseDetails?.poaHolders?.find((poa) => poa?.individualId === item?.individualId);
+          if (complainantPoaHolder) {
+            const mobileNumber = complainantPoaHolder?.mobileNumber;
+            const age = complainantPoaHolder?.age || "";
+            const address = formatAddress(complainantPoaHolder?.address);
             const tag = item?.additionalDetails?.tag;
 
             return {
@@ -307,7 +303,7 @@ const WitnessDrawerV2 = ({
               individualId: item?.individualId,
               isJoined: true,
               partyType: "complainant",
-              representingLitigants: poaHolder?.representingLitigants?.map((lit) => lit?.individualId),
+              representingLitigants: complainantPoaHolder?.representingLitigants?.map((lit) => lit?.individualId),
               mobileNumbers: mobileNumber ? [mobileNumber] : [],
               sourceName: fullName,
               age,
@@ -318,14 +314,10 @@ const WitnessDrawerV2 = ({
             };
           }
 
-          const userData = caseDetails?.additionalDetails?.complainantDetails?.formdata?.find(
-            (data) => data?.data?.complainantVerification?.individualDetails?.individualId === item?.individualId
-          )?.data;
-
-          const mobileNumber = userData?.complainantVerification?.mobileNumber;
-          const age = userData?.complainantAge || "";
-          const address = formatAddress(userData?.addressDetails);
-          const designation = userData?.complainantDesignation || "";
+          const mobileNumber = item?.mobileNumber?.[0] || null;
+          const age = item?.age || "";
+          const address = formatAddress(item?.permanentAddress);
+          const designation = item?.designation || "";
           const tag = item?.additionalDetails?.tag;
           return {
             code: fullName,
@@ -353,15 +345,11 @@ const WitnessDrawerV2 = ({
       caseDetails?.poaHolders
         ?.filter((item) => !complainantIds.has(item?.individualId))
         ?.map((item) => {
-          const fullName = removeInvalidNameParts(item?.name);
+          const fullName = removeInvalidNameParts(item?.fullName);
 
-          const userData = caseDetails?.additionalDetails?.complainantDetails?.formdata?.find(
-            (data) => data?.data?.poaVerification?.individualDetails?.individualId === item?.individualId
-          )?.data;
-
-          const mobileNumber = userData?.poaVerification?.mobileNumber;
-          const age = userData?.poaAge || "";
-          const address = formatAddress(userData?.poaAddressDetails);
+          const mobileNumber = item?.mobileNumber;
+          const age = item?.age || "";
+          const address = formatAddress(item?.permanentAddress);
           const tag = item?.additionalDetails?.tag;
           return {
             code: fullName,

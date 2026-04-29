@@ -10,7 +10,7 @@ import DocViewerWrapper from "../docViewerWrapper";
 import { Urls } from "../../../hooks";
 import { OrderWorkflowAction } from "@egovernments/digit-ui-module-orders/src/utils/orderWorkflow";
 import { HomeService } from "../../../../../home/src/hooks/services";
-import { getAdvocates } from "../../citizen/FileCase/EfilingValidationUtils";
+import { getAdvocates, transformCaseDataForFetching } from "../../citizen/FileCase/EfilingValidationUtils";
 import ImageModal from "../../../components/ImageModal";
 
 const noteConfig = [
@@ -68,12 +68,11 @@ const ReviewLitigantDetails = ({ path }) => {
     Boolean(caseId)
   );
 
-  const caseDetails = useMemo(
-    () => ({
-      ...caseData?.criteria?.[0]?.responseList?.[0],
-    }),
-    [caseData]
-  );
+  const caseDetails = useMemo(() => {
+    const caseDetails = structuredClone(caseData?.criteria?.[0]?.responseList?.[0] || {});
+    const updatedCaseData = transformCaseDataForFetching(caseDetails, ["witnessDetails", "advocateDetails", "complainantDetails"]);
+    return updatedCaseData;
+  }, [caseData]);
 
   const { data: applicationData, isloading: isApplicationLoading } = Digit.Hooks.submissions.useSearchSubmissionService(
     {
@@ -218,7 +217,7 @@ const ReviewLitigantDetails = ({ path }) => {
 
     const person = combined?.find((item) => item?.additionalDetails?.uuid === uuid);
 
-    return person?.additionalDetails?.fullName || person?.additionalDetails?.advocateName || "";
+    return person?.fullName || person?.additionalDetails?.advocateName || "";
   };
 
   const handleApproveReject = async (action) => {
@@ -293,7 +292,7 @@ const ReviewLitigantDetails = ({ path }) => {
       return caseDetails?.representatives?.find((rep) => rep?.additionalDetails?.uuid === profileRequest?.editorDetails?.uuid)?.additionalDetails
         ?.advocateName;
     } else {
-      return caseDetails?.litigants?.find((lit) => lit?.additionalDetails?.uuid === profileRequest?.editorDetails?.uuid)?.additionalDetails?.fullName;
+      return caseDetails?.litigants?.find((lit) => lit?.additionalDetails?.uuid === profileRequest?.editorDetails?.uuid)?.fullName;
     }
   }, [profileRequest, caseDetails]);
 

@@ -30,7 +30,7 @@ const applicationSubmitBailDocuments = async (
   res,
   qrCode,
   application,
-  courtCaseJudgeDetails
+  courtCaseJudgeDetails,
 ) => {
   const cnrNumber = req.query.cnrNumber;
   const applicationNumber = req.query.applicationNumber;
@@ -51,7 +51,7 @@ const applicationSubmitBailDocuments = async (
     return renderError(
       res,
       `${missingFields.join(", ")} are mandatory to generate the PDF`,
-      400
+      400,
     );
   }
 
@@ -69,19 +69,19 @@ const applicationSubmitBailDocuments = async (
     const resMessage = await handleApiCall(
       () =>
         search_message(tenantId, "rainmaker-submissions", "en_IN", requestInfo),
-      "Failed to query Localized messages"
+      "Failed to query Localized messages",
     );
     const messages = resMessage?.data?.messages || [];
     const messagesMap =
       messages?.length > 0
         ? Object.fromEntries(
-            messages.map(({ code, message }) => [code, message])
+            messages.map(({ code, message }) => [code, message]),
           )
         : {};
 
     const resCase = await handleApiCall(
       () => search_case(cnrNumber, tenantId, requestInfo, application?.courtId),
-      "Failed to query case service"
+      "Failed to query case service",
     );
     const courtCase = resCase?.data?.criteria[0]?.responseList[0];
     if (!courtCase) {
@@ -100,11 +100,11 @@ const applicationSubmitBailDocuments = async (
     if (advocateIndividualId) {
       const resAdvocate = await handleApiCall(
         () => search_advocate(tenantId, advocateIndividualId, requestInfo),
-        "Failed to query Advocate Details"
+        "Failed to query Advocate Details",
       );
       const advocateData = resAdvocate?.data?.advocates?.[0];
       const advocateDetails = advocateData?.responseList?.find(
-        (item) => item.isActive === true
+        (item) => item.isActive === true,
       );
       barRegistrationNumber = advocateDetails?.barRegistrationNumber || "";
       advocateName =
@@ -114,8 +114,8 @@ const applicationSubmitBailDocuments = async (
     const partyName = application?.additionalDetails?.onBehalOfName || "";
     const complainantName =
       courtCase?.litigants?.find(
-        (litigant) => litigant.partyType === "complainant.primary"
-      )?.additionalDetails?.fullName || "";
+        (litigant) => litigant.partyType === "complainant.primary",
+      )?.fullName || "";
 
     const applicationDocuments =
       application?.applicationDetails?.applicationDocuments || [];
@@ -138,9 +138,9 @@ const applicationSubmitBailDocuments = async (
             tenantId,
             code,
             entityId,
-            requestInfo
+            requestInfo,
           ),
-        "Failed to query sunbirdrc credential service"
+        "Failed to query sunbirdrc credential service",
       );
       const $ = cheerio.load(resCredential.data);
       const imgTag = $("img");
@@ -148,7 +148,7 @@ const applicationSubmitBailDocuments = async (
         return renderError(
           res,
           "No img tag found in the sunbirdrc response",
-          500
+          500,
         );
       }
       base64Url = imgTag.attr("src");
@@ -224,7 +224,7 @@ const applicationSubmitBailDocuments = async (
         : config.pdf.application_submit_bail_documents;
     const pdfResponse = await handleApiCall(
       () => create_pdf(tenantId, pdfKey, data, req.body),
-      "Failed to generate PDF of Application Submit Bail Documents"
+      "Failed to generate PDF of Application Submit Bail Documents",
     );
 
     const filename = `${pdfKey}_${new Date().getTime()}`;
@@ -245,7 +245,7 @@ const applicationSubmitBailDocuments = async (
       res,
       "Failed to create PDF for Application for Bail",
       500,
-      ex
+      ex,
     );
   }
 };

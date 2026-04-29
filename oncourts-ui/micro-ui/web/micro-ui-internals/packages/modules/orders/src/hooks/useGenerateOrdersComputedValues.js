@@ -111,20 +111,14 @@ const useGenerateOrdersComputedValues = ({
       caseDetails?.litigants
         ?.filter((item) => item?.partyType?.includes("complainant"))
         ?.map((item) => {
-          const fullName = removeInvalidNameParts(item?.additionalDetails?.fullName);
-          const mobileNumber = caseDetails?.additionalDetails?.complainantDetails?.formdata?.find(
-            (obj) => obj?.data?.complainantVerification?.individualDetails?.individualId === item?.individualId
-          )?.data?.complainantVerification?.mobileNumber;
+          const fullName = removeInvalidNameParts(item?.fullName);
           const poaHolder = caseDetails?.poaHolders?.find((poa) => poa?.individualId === item?.individualId);
-          const complainantPoaHolder = caseDetails?.poaHolders?.find((poa) =>
-            poa?.representingLitigants?.some((lit) => lit?.individualId === item?.individualId)
-          );
           if (poaHolder) {
             return {
               code: fullName,
               name: `${fullName} (Complainant, PoA Holder)`,
               uuid: allAdvocates[item?.additionalDetails?.uuid],
-              mobileNumber,
+              mobileNumber: item?.mobileNumber?.[0],
               partyUuid: item?.additionalDetails?.uuid,
               individualId: item?.individualId,
               isJoined: true,
@@ -132,11 +126,14 @@ const useGenerateOrdersComputedValues = ({
               representingLitigants: poaHolder?.representingLitigants?.map((lit) => lit?.individualId),
             };
           }
+          const complainantPoaHolder = caseDetails?.poaHolders?.find((poa) => {
+            return poa?.representingLitigants?.some((lit) => lit?.individualId === item?.individualId);
+          });
           return {
             code: fullName,
             name: `${fullName} (Complainant)`,
             uuid: allAdvocates[item?.additionalDetails?.uuid],
-            mobileNumber,
+            mobileNumber: item?.mobileNumber?.[0],
             poaUuid: complainantPoaHolder?.additionalDetails?.uuid,
             partyUuid: item?.additionalDetails?.uuid,
             individualId: item?.individualId,
@@ -153,7 +150,7 @@ const useGenerateOrdersComputedValues = ({
       caseDetails?.poaHolders
         ?.filter((item) => !complainantIds.has(item?.individualId))
         ?.map((item) => {
-          const fullName = removeInvalidNameParts(item?.name);
+          const fullName = removeInvalidNameParts(item?.fullName);
           return {
             code: fullName,
             name: `${fullName} (PoA Holder)`,
@@ -175,7 +172,7 @@ const useGenerateOrdersComputedValues = ({
 
       const results = await Promise?.all(
         litigants?.map(async (item) => {
-          const fullName = removeInvalidNameParts(item?.additionalDetails?.fullName);
+          const fullName = removeInvalidNameParts(item?.fullName);
           const uniqueId = caseDetails?.additionalDetails?.respondentDetails?.formdata?.find(
             (obj) => obj?.data?.respondentVerification?.individualDetails?.individualId === item?.individualId
           )?.uniqueId;

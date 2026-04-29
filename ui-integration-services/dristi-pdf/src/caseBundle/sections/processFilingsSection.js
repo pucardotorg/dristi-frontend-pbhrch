@@ -11,29 +11,29 @@ async function processFilingsSection(
   tenantId,
   requestInfo,
   TEMP_FILES_DIR,
-  indexCopy
+  indexCopy,
 ) {
   // move to filings section of case complaint
   logger.info(caseBundleMaster);
   const sectionPosition = indexCopy.sections?.findIndex(
-    (s) => s.name === "filings"
+    (s) => s.name === "filings",
   );
 
   const dynamicSectionNumber = getDynamicSectionNumber(
     indexCopy,
-    sectionPosition
+    sectionPosition,
   );
 
   const filingsSection = filterCaseBundleBySection(caseBundleMaster, "filings");
   const sortedFilingSection = [...filingsSection].sort(
-    (secA, secB) => secA.sorton - secB.sorton
+    (secA, secB) => secA.sorton - secB.sorton,
   );
   let validIndex = 1;
   const filingsLineItems = [];
 
   for (const section of sortedFilingSection) {
     const documentFileStoreId = courtCase.documents?.find(
-      (doc) => doc.documentType === section.doctype
+      (doc) => doc.documentType === section.doctype,
     )?.fileStore;
 
     if (!documentFileStoreId) continue;
@@ -42,14 +42,13 @@ async function processFilingsSection(
 
     if (section.docketpagerequired === "yes") {
       const complainant = courtCase.litigants?.find((litigant) =>
-        litigant.partyType.includes("complainant.primary")
+        litigant.partyType.includes("complainant.primary"),
       );
-      const docketComplainantName =
-        complainant?.additionalDetails?.fullName || "";
+      const docketComplainantName = complainant?.fullName || "";
       const docketNameOfAdvocate = courtCase.representatives?.find((adv) =>
         adv.representing?.find(
-          (party) => party.individualId === complainant.individualId
-        )
+          (party) => party.individualId === complainant.individualId,
+        ),
       )?.additionalDetails?.advocateName;
 
       const docketCounselFor = docketNameOfAdvocate
@@ -66,14 +65,14 @@ async function processFilingsSection(
           docketCounselFor: docketCounselFor,
           docketNameOfFiling: docketNameOfAdvocate || docketComplainantName,
           docketDateOfSubmission: new Date(
-            courtCase.registrationDate
+            courtCase.registrationDate,
           ).toLocaleDateString("en-IN"),
           documentPath,
         },
         courtCase,
         tenantId,
         requestInfo,
-        TEMP_FILES_DIR
+        TEMP_FILES_DIR,
       );
     }
 
@@ -91,7 +90,7 @@ async function processFilingsSection(
   // update index
 
   const filingsIndexSection = indexCopy.sections?.find(
-    (section) => section.name === "filings"
+    (section) => section.name === "filings",
   );
   filingsIndexSection.lineItems = filingsLineItems?.filter(Boolean);
 }

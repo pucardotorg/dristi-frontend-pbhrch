@@ -111,24 +111,24 @@ const AddWitnessModal = ({ activeTab, tenantId, onCancel, caseDetails, isEmploye
     if (isAdvocateLoggedIn) {
       return isAdvocateLoggedIn?.representing?.map((r) => {
         return {
-          code: r?.additionalDetails?.fullName,
-          name: r?.additionalDetails?.fullName,
+          code: r?.fullName,
+          name: r?.fullName,
           uuid: r?.additionalDetails?.uuid,
         };
       });
     } else if (isPipLoggedIn) {
       return [
         {
-          code: isPipLoggedIn?.additionalDetails?.fullName,
-          name: isPipLoggedIn?.additionalDetails?.fullName,
+          code: isPipLoggedIn?.fullName,
+          name: isPipLoggedIn?.fullName,
           uuid: isPipLoggedIn?.additionalDetails?.uuid,
         },
       ];
     } else if (accusedLoggedIn) {
       return [
         {
-          code: accusedLoggedIn?.additionalDetails?.fullName,
-          name: accusedLoggedIn?.additionalDetails?.fullName,
+          code: accusedLoggedIn?.fullName,
+          name: accusedLoggedIn?.fullName,
           uuid: accusedLoggedIn?.additionalDetails?.uuid,
         },
       ];
@@ -338,15 +338,12 @@ const AddWitnessModal = ({ activeTab, tenantId, onCancel, caseDetails, isEmploye
 
   const checkDuplicateMobileEmailValidation = ({ formData, setError, clearErrors, formdata, caseDetails }) => {
     const complainantMobileNumbersArray =
-      caseDetails?.additionalDetails?.complainantDetails?.formdata
-        .filter((data) => {
-          if (data?.data?.complainantVerification?.mobileNumber) {
-            return true;
-          } else return false;
-        })
-        .map((data) => {
-          return data?.data?.complainantVerification?.mobileNumber;
-        }) || [];
+      caseDetails?.litigants?.reduce((acc, lit) => {
+        if (lit?.partyType?.includes("complainant") && lit?.mobileNumber?.length > 0) {
+          acc.push(lit.mobileNumber?.[0]);
+        }
+        return acc;
+      }, []) || [];
     const respondentMobileNumbersArray =
       caseDetails?.additionalDetails?.respondentDetails?.formdata
         .filter((data) => {

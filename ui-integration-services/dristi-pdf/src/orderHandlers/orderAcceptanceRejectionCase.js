@@ -29,7 +29,7 @@ async function orderAcceptanceRejectionCase(req, res, qrCode) {
     return renderError(
       res,
       `${missingFields.join(", ")} are mandatory to generate the PDF`,
-      400
+      400,
     );
   }
 
@@ -46,7 +46,7 @@ async function orderAcceptanceRejectionCase(req, res, qrCode) {
   try {
     const resCase = await handleApiCall(
       () => search_case(cnrNumber, tenantId, requestInfo),
-      "Failed to query case service"
+      "Failed to query case service",
     );
     const courtCase = resCase?.data?.criteria[0]?.responseList[0];
     if (!courtCase) {
@@ -58,7 +58,7 @@ async function orderAcceptanceRejectionCase(req, res, qrCode) {
 
     const resOrder = await handleApiCall(
       () => search_order(tenantId, orderId, requestInfo),
-      "Failed to query order service"
+      "Failed to query order service",
     );
     const order = resOrder?.data?.list[0];
     if (!order) {
@@ -74,9 +74,9 @@ async function orderAcceptanceRejectionCase(req, res, qrCode) {
           false,
           courtCase.filingNumber,
           "PUBLISHED",
-          "NOTICE"
+          "NOTICE",
         ),
-      "Failed to query order service"
+      "Failed to query order service",
     );
 
     const noticeList = listOfAllOrder.data.list.map((item) => {
@@ -92,8 +92,8 @@ async function orderAcceptanceRejectionCase(req, res, qrCode) {
 
     const complainantName =
       courtCase?.litigants?.find(
-        (litigant) => litigant.partyType === "complainant.primary"
-      )?.additionalDetails?.fullName || "";
+        (litigant) => litigant.partyType === "complainant.primary",
+      )?.fullName || "";
 
     // Handle QR code if enabled
     let base64Url = "";
@@ -104,9 +104,9 @@ async function orderAcceptanceRejectionCase(req, res, qrCode) {
             tenantId,
             code,
             entityId,
-            requestInfo
+            requestInfo,
           ),
-        "Failed to query sunbirdrc credential service"
+        "Failed to query sunbirdrc credential service",
       );
       const $ = cheerio.load(resCredential.data);
       const imgTag = $("img");
@@ -114,7 +114,7 @@ async function orderAcceptanceRejectionCase(req, res, qrCode) {
         return renderError(
           res,
           "No img tag found in the sunbirdrc response",
-          500
+          500,
         );
       }
       base64Url = imgTag.attr("src");
@@ -182,7 +182,7 @@ async function orderAcceptanceRejectionCase(req, res, qrCode) {
         : config.pdf.order_acceptance_rejection_case;
     const pdfResponse = await handleApiCall(
       () => create_pdf(tenantId, pdfKey, data, req.body),
-      "Failed to generate PDF of Order for Acceptance Rejection of Case"
+      "Failed to generate PDF of Order for Acceptance Rejection of Case",
     );
 
     const filename = `${pdfKey}_${new Date().getTime()}`;
@@ -203,7 +203,7 @@ async function orderAcceptanceRejectionCase(req, res, qrCode) {
       res,
       "Failed to generate PDF for Acceptance of Bail",
       500,
-      ex
+      ex,
     );
   }
 }

@@ -54,6 +54,7 @@ import {
 import useSearchMiscellaneousTemplate from "../../hooks/orders/useSearchMiscellaneousTemplate";
 import { CaseWorkflowState } from "@egovernments/digit-ui-module-dristi/src/Utils/caseWorkflow";
 import CustomToast from "@egovernments/digit-ui-module-dristi/src/components/CustomToast";
+import { transformCaseDataForFetching } from "@egovernments/digit-ui-module-dristi/src/pages/citizen/FileCase/EfilingValidationUtils";
 
 const GenerateOrdersV2 = () => {
   const { t } = useTranslation();
@@ -174,12 +175,11 @@ const GenerateOrdersV2 = () => {
     fetchInbox();
   }, [courtId]);
 
-  const caseDetails = useMemo(
-    () => ({
-      ...caseData?.criteria?.[0]?.responseList?.[0],
-    }),
-    [caseData]
-  );
+  const caseDetails = useMemo(() => {
+    const caseDetails = structuredClone(caseData?.criteria?.[0]?.responseList?.[0] || {});
+    const updatedCaseData = transformCaseDataForFetching(caseDetails, ["complainantDetails"]);
+    return updatedCaseData;
+  }, [caseData]);
 
   const cnrNumber = useMemo(() => caseDetails?.cnrNumber, [caseDetails]);
   const caseCourtId = useMemo(() => caseDetails?.courtId || localStorage.getItem("courtId"), [caseDetails]);
@@ -1084,10 +1084,10 @@ const GenerateOrdersV2 = () => {
         const complainantPrimary = caseDetails?.litigants?.find((item) => item?.partyType?.includes("complainant.primary"));
         const respondentPrimary = caseDetails?.litigants?.find((item) => item?.partyType?.includes("respondent.primary"));
 
-        updatedFormdata.nameofComplainant = complainantPrimary?.additionalDetails?.fullName;
+        updatedFormdata.nameofComplainant = complainantPrimary?.fullName;
         setValueRef?.current?.[index]?.("nameofComplainant", updatedFormdata.nameofComplainant);
 
-        updatedFormdata.nameofRespondent = respondentPrimary?.additionalDetails?.fullName;
+        updatedFormdata.nameofRespondent = respondentPrimary?.fullName;
         setValueRef?.current?.[index]?.("nameofRespondent", updatedFormdata.nameofRespondent);
 
         updatedFormdata.nameofComplainantAdvocate = uuidNameMap?.[allAdvocates?.[complainantPrimary?.additionalDetails?.uuid]] || "";

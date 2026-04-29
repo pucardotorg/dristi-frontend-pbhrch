@@ -423,7 +423,7 @@ function CaseFileAdmission({ t, path }) {
       litigants.map((litigant) => {
         return {
           ...litigant,
-          name: litigant.additionalDetails?.fullName,
+          name: litigant?.fullName,
         };
       }),
     [litigants]
@@ -436,7 +436,7 @@ function CaseFileAdmission({ t, path }) {
         return {
           ...rep,
           name: rep.additionalDetails?.advocateName,
-          partyType: `Advocate (for ${rep.representing?.map((client) => client?.additionalDetails?.fullName)?.join(", ")})`,
+          partyType: `Advocate (for ${rep.representing?.map((client) => client?.fullName)?.join(", ")})`,
         };
       }),
     [reps]
@@ -639,7 +639,7 @@ function CaseFileAdmission({ t, path }) {
         document: form?.data?.proofOfReplyFileUpload?.document,
         key: "proofOfReplyFileUpload",
       })),
-      ...caseDetails?.additionalDetails?.prayerSwornStatement?.formdata?.map((form) => ({
+      ...caseDetails?.caseDetails?.prayerSwornStatement?.formdata?.map((form) => ({
         document: form?.data?.swornStatement?.document,
         key: "swornStatement",
       })),

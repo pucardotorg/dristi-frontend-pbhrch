@@ -638,17 +638,17 @@ const ComplainantSignature = ({ path }) => {
       const litigant = litigants?.find((litigant) => litigant?.additionalDetails?.uuid === loggedInUserOnBehalfOfUuid);
       const poaHolder = poaHolders?.find((poa) => poa?.individualId === litigant?.individualId);
       const representedNames = poaHolder?.representingLitigants
-        ?.map((rep) => rep?.additionalDetails?.fullName)
+        ?.map((rep) => rep?.fullName)
         ?.filter(Boolean)
         ?.join(", ");
-      placeholder = `${litigant?.additionalDetails?.fullName} - Complainant ${litigant?.additionalDetails?.currentPosition}, PoA holder for ${representedNames}`;
+      placeholder = `${litigant?.fullName} - Complainant ${litigant?.additionalDetails?.currentPosition}, PoA holder for ${representedNames}`;
     } else if (isCurrentPersonPoa) {
       const poaHolder = poaHolders?.find((poa) => poa?.additionalDetails?.uuid === loggedInUserOnBehalfOfUuid);
       const representedNames = poaHolder?.representingLitigants
-        ?.map((rep) => rep?.additionalDetails?.fullName)
+        ?.map((rep) => rep?.fullName)
         ?.filter(Boolean)
         ?.join(", ");
-      placeholder = `${poaHolder?.name} - PoA holder for ${representedNames}`;
+      placeholder = `${poaHolder?.fullName} - PoA holder for ${representedNames}`;
     } else {
       if (isOwnerAdvocateSelf) {
         const advocate = caseDetails?.representatives?.find((advocate) => advocate?.additionalDetails?.uuid === loggedInUserOnBehalfOfUuid);
@@ -667,7 +667,7 @@ const ComplainantSignature = ({ path }) => {
         return placeholder; // Return placeholder directly for advocate filing case
       } else {
         const litigant = litigants?.find((litigant) => litigant?.additionalDetails?.uuid === loggedInUserOnBehalfOfUuid);
-        placeholder = `${litigant?.additionalDetails?.fullName} - Complainant ${litigant?.additionalDetails?.currentPosition}`;
+        placeholder = `${litigant?.fullName} - Complainant ${litigant?.additionalDetails?.currentPosition}`;
       }
     }
 
@@ -1218,7 +1218,7 @@ const ComplainantSignature = ({ path }) => {
             <div>{t("COMPLAINT_SIGN")}:</div>
             {litigants?.map((litigant, index) => (
               <div key={index} style={{ ...styles.litigantDetails, marginTop: "5px", fontSize: "15px" }}>
-                {litigant?.additionalDetails?.fullName}
+                {litigant?.fullName}
                 {litigant?.hasSigned ||
                 litigant?.poaHolder?.hasSigned ||
                 (litigant?.additionalDetails?.uuid === loggedInUserOnBehalfOfUuid && (isEsignSuccess || uploadDoc)) ? (
@@ -1236,7 +1236,7 @@ const ComplainantSignature = ({ path }) => {
                 (litigant) =>
                   litigant?.representatives?.length > 0 && (
                     <div style={{ ...styles.advocateDetails, marginTop: "5px", fontSize: "15px" }}>
-                      {`${t("ADVOCATE_FOR")} ${litigant?.additionalDetails?.fullName}`}
+                      {`${t("ADVOCATE_FOR")} ${litigant?.fullName}`}
                       {litigant?.representatives?.some((rep) => rep?.hasSigned) ||
                       litigant?.representatives?.some(
                         (rep) => rep?.additionalDetails?.uuid === litigant?.poaHolder?.additionalDetails?.uuid && litigant?.poaHolder?.hasSigned

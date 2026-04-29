@@ -16,7 +16,7 @@ async function orderApprovalRejectionLitigantDetails(
   qrCode,
   order,
   compositeOrder,
-  courtCaseJudgeDetails
+  courtCaseJudgeDetails,
 ) {
   const cnrNumber = req.query.cnrNumber;
   const tenantId = req.query.tenantId;
@@ -35,7 +35,7 @@ async function orderApprovalRejectionLitigantDetails(
     return renderError(
       res,
       `${missingFields.join(", ")} are mandatory to generate the PDF`,
-      400
+      400,
     );
   }
 
@@ -44,7 +44,7 @@ async function orderApprovalRejectionLitigantDetails(
     const resCase = await handleApiCall(
       res,
       () => search_case(cnrNumber, tenantId, requestInfo, order?.courtId),
-      "Failed to query case service"
+      "Failed to query case service",
     );
     const courtCase = resCase?.data?.criteria[0]?.responseList[0];
     if (!courtCase) {
@@ -58,24 +58,22 @@ async function orderApprovalRejectionLitigantDetails(
       courtCase?.representatives?.find(
         (rep) =>
           rep?.additionalDetails?.uuid ===
-          order?.additionalDetails?.applicantPartyUuid
+          order?.additionalDetails?.applicantPartyUuid,
       ) || {};
 
     const advComplainantName =
       advocate?.representing?.find(
         (litigant) =>
-          litigant?.individualId === order?.additionalDetails?.uniqueId
-      )?.additionalDetails?.fullName ||
-      advocate?.representing
-        ?.map((rep) => rep?.additionalDetails?.fullName)
-        .join(", ");
+          litigant?.individualId === order?.additionalDetails?.uniqueId,
+      )?.fullName ||
+      advocate?.representing?.map((rep) => rep?.fullName).join(", ");
 
     const complainantName =
       courtCase?.litigants?.find(
         (litigant) =>
           litigant?.additionalDetails?.uuid ===
-          order?.additionalDetails?.applicantPartyUuid
-      )?.additionalDetails?.fullName || "";
+          order?.additionalDetails?.applicantPartyUuid,
+      )?.fullName || "";
 
     // Handle QR code if enabled
     let base64Url = "";
@@ -87,9 +85,9 @@ async function orderApprovalRejectionLitigantDetails(
             tenantId,
             code,
             entityId,
-            requestInfo
+            requestInfo,
           ),
-        "Failed to query sunbirdrc credential service"
+        "Failed to query sunbirdrc credential service",
       );
       const $ = cheerio.load(resCredential.data);
       const imgTag = $("img");
@@ -97,7 +95,7 @@ async function orderApprovalRejectionLitigantDetails(
         return renderError(
           res,
           "No img tag found in the sunbirdrc response",
-          500
+          500,
         );
       }
       base64Url = imgTag.attr("src");
@@ -127,7 +125,7 @@ async function orderApprovalRejectionLitigantDetails(
             advocate?.additionalDetails?.advocateName && advComplainantName,
           dateOfApplication: formatDate(
             new Date(order?.additionalDetails?.dateOfApplication),
-            "DD-MM-YYYY"
+            "DD-MM-YYYY",
           ),
           reasonForChange:
             order?.orderDetails?.reasonForLitigantDetailsChange || "",
@@ -153,7 +151,7 @@ async function orderApprovalRejectionLitigantDetails(
       const pdfResponse = await handleApiCall(
         res,
         () => create_pdf_v2(tenantId, pdfKey, data, req.body),
-        "Failed to generate PDF of generic order"
+        "Failed to generate PDF of generic order",
       );
       return pdfResponse.data;
     }
@@ -161,7 +159,7 @@ async function orderApprovalRejectionLitigantDetails(
     const pdfResponse = await handleApiCall(
       res,
       () => create_pdf(tenantId, pdfKey, data, req.body),
-      "Failed to generate PDF of Order For Approval Rejection Litigant Details Change"
+      "Failed to generate PDF of Order For Approval Rejection Litigant Details Change",
     );
 
     const filename = `${pdfKey}_${new Date().getTime()}`;

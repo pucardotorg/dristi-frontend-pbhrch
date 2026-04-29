@@ -18,25 +18,25 @@ async function processComplainantEvidence(
   requestInfo,
   TEMP_FILES_DIR,
   indexCopy,
-  messagesMap
+  messagesMap,
 ) {
   const complainantDepositionSection = filterCaseBundleBySection(
     caseBundleMaster,
-    "complainantevidencedepositions"
+    "complainantevidencedepositions",
   );
 
   const complainantEvidenceSection = filterCaseBundleBySection(
     caseBundleMaster,
-    "complainantevidence"
+    "complainantevidence",
   );
 
   const sectionPosition = indexCopy.sections?.findIndex(
-    (s) => s.name === "complainantevidence"
+    (s) => s.name === "complainantevidence",
   );
 
   const dynamicSectionNumber = getDynamicSectionNumber(
     indexCopy,
-    sectionPosition
+    sectionPosition,
   );
 
   const complainantEvidenceLineItems = [];
@@ -57,12 +57,13 @@ async function processComplainantEvidence(
         sortBy: complainantDepositionSection[0].sorton,
         order: "asc",
         limit: 100,
-      }
+      },
     );
 
     const courtList = courtDocs?.data?.artifacts?.filter(
       (artifact) =>
-        artifact?.additionalDetails?.witnessDetails?.ownerType === "COMPLAINANT"
+        artifact?.additionalDetails?.witnessDetails?.ownerType ===
+        "COMPLAINANT",
     );
 
     if (courtList?.length !== 0) {
@@ -77,7 +78,7 @@ async function processComplainantEvidence(
             tenantId,
             evidenceFileStoreId,
             requestInfo,
-            TEMP_FILES_DIR
+            TEMP_FILES_DIR,
           );
           return {
             sourceId: evidenceFileStoreId,
@@ -86,7 +87,7 @@ async function processComplainantEvidence(
             createPDF: false,
             content: "complainantevidencedepositions",
           };
-        })
+        }),
       );
       complainantEvidenceLineItems.push(...innerLineItems);
     }
@@ -110,7 +111,7 @@ async function processComplainantEvidence(
         sortBy: section.sorton,
         order: "asc",
         limit: 100,
-      }
+      },
     );
 
     const complainantList = complainantDocs?.data?.artifacts;
@@ -128,7 +129,7 @@ async function processComplainantEvidence(
               [evidenceFileStoreId, sealFileStore],
               tenantId,
               requestInfo,
-              TEMP_FILES_DIR
+              TEMP_FILES_DIR,
             );
           }
 
@@ -138,17 +139,16 @@ async function processComplainantEvidence(
             const sourceUuid = evidence?.auditdetails?.createdBy;
 
             const sourceLitigant = courtCase.litigants?.find(
-              (litigant) => litigant.additionalDetails.uuid === sourceUuid
+              (litigant) => litigant.additionalDetails.uuid === sourceUuid,
             );
             const sourceRepresentative = courtCase.representatives?.find(
-              (rep) => rep.additionalDetails.uuid === sourceUuid
+              (rep) => rep.additionalDetails.uuid === sourceUuid,
             );
             let docketNameOfFiling;
             let docketCounselFor;
 
             if (sourceLitigant) {
-              docketNameOfFiling =
-                sourceLitigant.additionalDetails?.fullName || "";
+              docketNameOfFiling = sourceLitigant.fullName || "";
               docketCounselFor = "";
             } else if (sourceRepresentative) {
               const docketNameOfComplainants = sourceRepresentative.representing
@@ -160,15 +160,15 @@ async function processComplainantEvidence(
               docketCounselFor = `COUNSEL FOR THE ${evidence.sourceType} - ${docketNameOfComplainants}`;
             } else {
               const complainant = courtCase.litigants?.find((litigant) =>
-                litigant.partyType.includes("complainant.primary")
+                litigant.partyType.includes("complainant.primary"),
               );
               const docketNameOfComplainants =
                 complainant.additionalDetails.fullName;
               docketNameOfFiling =
                 courtCase.representatives?.find((adv) =>
                   adv.representing?.find(
-                    (party) => party.individualId === complainant.individualId
-                  )
+                    (party) => party.individualId === complainant.individualId,
+                  ),
                 )?.additionalDetails?.advocateName || docketNameOfComplainants;
               docketCounselFor =
                 docketNameOfFiling === docketNameOfComplainants
@@ -185,7 +185,7 @@ async function processComplainantEvidence(
               ];
 
             const evidencePosition = !complainantEvidenceLineItems?.filter(
-              Boolean
+              Boolean,
             )?.length
               ? "1"
               : "2";
@@ -203,21 +203,21 @@ async function processComplainantEvidence(
                 docketCounselFor: docketCounselFor,
                 docketNameOfFiling: docketNameOfFiling,
                 docketDateOfSubmission: new Date(
-                  evidence.createdDate
+                  evidence.createdDate,
                 ).toLocaleDateString("en-IN"),
                 documentPath: documentPath,
               },
               courtCase,
               tenantId,
               requestInfo,
-              TEMP_FILES_DIR
+              TEMP_FILES_DIR,
             );
           } else {
             newEvidenceFileStoreId = await duplicateExistingFileStore(
               tenantId,
               evidenceFileStoreId,
               requestInfo,
-              TEMP_FILES_DIR
+              TEMP_FILES_DIR,
             );
           }
 
@@ -228,14 +228,14 @@ async function processComplainantEvidence(
             createPDF: false,
             content: "complainantevidence",
           };
-        })
+        }),
       );
       complainantEvidenceLineItems.push(...innerLineItems);
     }
   }
 
   const complainantEvidenceIndexSection = indexCopy.sections?.find(
-    (section) => section.name === "complainantevidence"
+    (section) => section.name === "complainantevidence",
   );
   complainantEvidenceIndexSection.lineItems =
     complainantEvidenceLineItems?.filter(Boolean);

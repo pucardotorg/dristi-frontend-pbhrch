@@ -12,7 +12,6 @@ All constants and utility functions extracted:
 
 - ✅ `constants.js` - All constants (stateSla, HearingWorkflowState, homeTabEnum, styles, etc.)
 - ✅ `caseDataProcessingUtils.js` - Data transformation utilities (getStatue, getLitigants, getComplainants, getRespondents, getWitnesses, getShowMakeSubmission, etc.)
-- ✅ `partyUtils.js` - Party name utilities (removeInvalidNameParts, getFormattedName, constructFullName)
 - ✅ `actionOptionsUtils.js` - Action options configuration
 - ✅ `permissionMappings.js` - citizenActionOptions, employeeActionsPermissionsMapping, filterActionsByPermissions
 - ✅ `breadcrumbUtils.js` - getEmployeeCrumbs, getAdvocateName
@@ -36,7 +35,6 @@ All constants and utility functions extracted:
 10 custom hooks created/organized:
 
 - ✅ `useUserContext.js` - User info, roles, permissions
-- ✅ `useCaseParties.js` - Litigants, representatives extraction
 - ✅ `useApplicationFilters.js` - Application filtering logic
 - ✅ `useInboxData.js` - Inbox fetching logic
 - ✅ `useEvidenceActions.js` - Evidence mutation logic

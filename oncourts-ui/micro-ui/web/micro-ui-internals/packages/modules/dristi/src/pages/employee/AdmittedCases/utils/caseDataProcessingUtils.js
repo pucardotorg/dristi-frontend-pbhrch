@@ -1,5 +1,5 @@
+import { constructFullName, getFormattedName, removeInvalidNameParts } from "@egovernments/digit-ui-module-orders/src/utils";
 import { CaseWorkflowState } from "../../../../Utils/caseWorkflow";
-import { removeInvalidNameParts, getFormattedName, constructFullName } from "./partyUtils";
 
 // Helper function to get statute abbreviation from case details
 export const getStatue = (caseDetails) => {
@@ -28,7 +28,7 @@ export const getFinalLitigantsData = (litigants) => {
   return litigants?.map((litigant) => {
     return {
       ...litigant,
-      name: removeInvalidNameParts(litigant.additionalDetails?.fullName),
+      name: removeInvalidNameParts(litigant?.fullName),
     };
   });
 };
@@ -44,7 +44,7 @@ export const getFinalRepresentativesData = (reps) => {
     return {
       ...rep,
       name: removeInvalidNameParts(rep.additionalDetails?.advocateName),
-      partyType: `Advocate (for ${rep.representing?.map((client) => removeInvalidNameParts(client?.additionalDetails?.fullName))?.join(", ")})`,
+      partyType: `Advocate (for ${rep.representing?.map((client) => removeInvalidNameParts(client?.fullName))?.join(", ")})`,
     };
   });
 };
@@ -87,11 +87,8 @@ export const getComplainants = (caseDetails, allAdvocates) => {
     caseDetails?.litigants
       ?.filter((item) => item?.partyType?.includes("complainant"))
       ?.map((item) => {
-        const fullName = removeInvalidNameParts(item?.additionalDetails?.fullName);
+        const fullName = removeInvalidNameParts(item?.fullName);
         const poaHolder = caseDetails?.poaHolders?.find((poa) => poa?.individualId === item?.individualId);
-        const complainantDetails = caseDetails?.additionalDetails?.complainantDetails?.formdata?.find(
-          (obj) => obj?.data?.complainantVerification?.individualDetails?.individualId === item?.individualId
-        )?.data;
         if (poaHolder) {
           return {
             additionalDetails: item?.additionalDetails,
@@ -105,6 +102,9 @@ export const getComplainants = (caseDetails, allAdvocates) => {
             representingLitigants: poaHolder?.representingLitigants?.map((lit) => lit?.individualId),
           };
         }
+        const complainantPoaHolder = caseDetails?.poaHolders?.find((poa) => {
+          return poa?.representingLitigants?.some((lit) => lit?.individualId === item?.individualId);
+        });
         return {
           additionalDetails: item?.additionalDetails,
           code: fullName,
@@ -114,7 +114,7 @@ export const getComplainants = (caseDetails, allAdvocates) => {
           individualId: item?.individualId,
           isJoined: true,
           partyType: "complainant",
-          poaUuid: complainantDetails?.poaVerification?.individualDetails?.userUuid,
+          poaUuid: complainantPoaHolder?.additionalDetails?.uuid,
         };
       }) || []
   );
@@ -126,7 +126,7 @@ export const getRespondents = (caseDetails, allAdvocates) => {
     caseDetails?.litigants
       ?.filter((item) => item?.partyType?.includes("respondent"))
       .map((item) => {
-        const fullName = removeInvalidNameParts(item?.additionalDetails?.fullName);
+        const fullName = removeInvalidNameParts(item?.fullName);
         const respondentDetails = caseDetails?.additionalDetails?.respondentDetails?.formdata?.find(
           (obj) => obj?.data?.respondentVerification?.individualDetails?.individualId === item?.individualId
         );
