@@ -1413,24 +1413,24 @@ export const createIndividualUser = async ({ data, documentData, tenantId, isCom
         {
           tenantId: tenantId,
           type: "PERMANENT",
-          latitude: data?.addressDetails?.coordinates?.latitude,
-          longitude: data?.addressDetails?.coordinates?.longitude,
-          city: data?.addressDetails?.city,
-          pincode: data?.addressDetails?.pincode || data?.["addressDetails-select"]?.pincode,
-          addressLine1: data?.addressDetails?.state,
-          addressLine2: data?.addressDetails?.district,
-          street: data?.addressDetails?.locality,
+          latitude: data?.[isComplainant ? "addressDetails" : "poaAddressDetails"]?.coordinates?.latitude,
+          longitude: data?.[isComplainant ? "addressDetails" : "poaAddressDetails"]?.coordinates?.longitude,
+          city: data?.[isComplainant ? "addressDetails" : "poaAddressDetails"]?.city,
+          pincode: data?.[isComplainant ? "addressDetails" : "poaAddressDetails"]?.pincode || data?.["addressDetails-select"]?.pincode,
+          addressLine1: data?.[isComplainant ? "addressDetails" : "poaAddressDetails"]?.state,
+          addressLine2: data?.[isComplainant ? "addressDetails" : "poaAddressDetails"]?.district,
+          street: data?.[isComplainant ? "addressDetails" : "poaAddressDetails"]?.locality,
         },
         {
           tenantId: tenantId,
           type: "CORRESPONDENCE",
-          latitude: data?.currentAddressDetails?.coordinates?.latitude,
-          longitude: data?.currentAddressDetails?.coordinates?.longitude,
-          city: data?.currentAddressDetails?.city,
-          pincode: data?.currentAddressDetails?.pincode || data?.["currentAddressDetails-select"]?.pincode,
-          addressLine1: data?.currentAddressDetails?.state,
-          addressLine2: data?.currentAddressDetails?.district,
-          street: data?.currentAddressDetails?.locality,
+          latitude: data?.[isComplainant ? "currentAddressDetails" : "poaAddressDetails"]?.coordinates?.latitude,
+          longitude: data?.[isComplainant ? "currentAddressDetails" : "poaAddressDetails"]?.coordinates?.longitude,
+          city: data?.[isComplainant ? "currentAddressDetails" : "poaAddressDetails"]?.city,
+          pincode: data?.[isComplainant ? "currentAddressDetails" : "poaAddressDetails"]?.pincode,
+          addressLine1: data?.[isComplainant ? "currentAddressDetails" : "poaAddressDetails"]?.state,
+          addressLine2: data?.[isComplainant ? "currentAddressDetails" : "poaAddressDetails"]?.district,
+          street: data?.[isComplainant ? "currentAddressDetails" : "poaAddressDetails"]?.locality,
         },
       ],
       identifiers: [
@@ -1725,14 +1725,16 @@ export const updateCaseDetails = async ({
   let tempDocList = structuredClone(caseDetails?.documents || []);
 
   const updateTempDocListMultiForm = (docList, docTypes) => {
-    const indicesToRemove = tempDocList.map((doc, index) => (docTypes.includes(doc.documentType) ? index : -1)).filter((index) => index !== -1);
+    const indicesToRemove = tempDocList?.map((doc, index) => (docTypes?.includes(doc?.documentType) ? index : -1)).filter((index) => index !== -1);
 
-    for (let i = indicesToRemove.length - 1; i >= 0; i--) {
-      tempDocList.splice(indicesToRemove[i], 1);
+    for (let i = indicesToRemove?.length - 1; i >= 0; i--) {
+      tempDocList?.splice(indicesToRemove[i], 1);
     }
-    if (docList.length > 0) {
-      for (let i = 0; i < docList.length; i++) {
-        tempDocList.push(docList[i]);
+
+    const docsToAdd = docList?.filter((doc) => docTypes?.includes(doc?.documentType));
+    if (docsToAdd?.length > 0) {
+      for (let i = 0; i < docsToAdd?.length; i++) {
+        tempDocList?.push(docsToAdd[i]);
       }
     }
   };
@@ -1858,7 +1860,6 @@ export const updateCaseDetails = async ({
               transferredPOA: data?.data?.transferredPOA,
               permanentAddress: isRepresentative ? data?.data?.addressCompanyDetails : data?.data?.addressDetails,
               currentAddress: isRepresentative ? null : data?.data?.currentAddressDetails,
-              companyAddress: isRepresentative ? data?.data?.addressCompanyDetails : null,
               additionalDetails: {
                 uuid: userUuid ? userUuid : null,
                 currentPosition: index + 1,
@@ -2025,7 +2026,6 @@ export const updateCaseDetails = async ({
                 transferredPOA: data?.data?.transferredPOA,
                 permanentAddress: isRepresentative ? data?.data?.addressCompanyDetails : data?.data?.addressDetails,
                 currentAddress: isRepresentative ? null : data?.data?.currentAddressDetails,
-                companyAddress: isRepresentative ? data?.data?.addressCompanyDetails : null,
                 additionalDetails: {
                   uuid: userUuid ? userUuid : null,
                   currentPosition: index + 1,
@@ -2263,6 +2263,7 @@ export const updateCaseDetails = async ({
     const litigantUploadedDocuments = {};
     const poaUploadedDocuments = {};
     const poaDocumentTypes = [documentsTypeMapping["poaComplainantId"], documentsTypeMapping["poaAuthorizationDocument"]];
+    const complainantDocTypes = [documentsTypeMapping["complainantId"], documentsTypeMapping["complainantCompanyDetailsUpload"]];
     const pushLitigantDocument = (index, doc) => {
       if (!doc || !doc.documentType || !doc.fileStore) return;
       if (poaDocumentTypes.includes(doc.documentType)) return;
@@ -2403,11 +2404,6 @@ export const updateCaseDetails = async ({
             );
             setFormDataValue("poaAuthorizationDocument", documentData?.poaAuthorizationDocument);
           }
-          const complainantDocTypes = [
-            documentsTypeMapping["complainantId"],
-            documentsTypeMapping["complainantCompanyDetailsUpload"],
-            documentsTypeMapping["poaAuthorizationDocument"],
-          ];
           updateTempDocListMultiForm(docList, complainantDocTypes);
 
           //// updating information for POA
@@ -2582,23 +2578,8 @@ export const updateCaseDetails = async ({
       }
     }
 
-    // Step 2: Map document data to each representing litigant
-    const finalPoaHolders = Array?.from(mergedPoaHoldersMap?.values())?.map((poaHolder) => ({
-      ...poaHolder,
-      representingLitigants:
-        poaHolder?.representingLitigants?.map((litigant) => {
-          const currFormData = newFormData?.find(
-            (form) => form?.data?.complainantVerification?.individualDetails?.individualId === litigant?.individualId
-          );
-          return {
-            ...litigant,
-            documents: currFormData?.data?.poaAuthorizationDocument?.poaDocument,
-          };
-        }) || [],
-    }));
-
-    // Step 3: Inject existing backend PoA details (id, audit info, etc.)
-    const updatedPoaHolders = finalPoaHolders?.map((poaHolder) => {
+    // Step 2: Inject existing backend PoA details (id, audit info, etc.)
+    const updatedPoaHolders = Array?.from(mergedPoaHoldersMap?.values())?.map((poaHolder) => {
       const existingLit = caseDetails?.poaHolders?.find((poa) => poa?.individualId === poaHolder?.individualId);
       return existingLit
         ? {
@@ -2610,7 +2591,7 @@ export const updateCaseDetails = async ({
         : poaHolder;
     });
 
-    // Step 4: Add previous PoAs not included in new data as inactive
+    // Step 3: Add previous PoAs not included in new data as inactive
     const oldPoAsToAdd =
       caseDetails?.poaHolders?.filter((poa) => !updatedPoaHolders?.some((newPoa) => newPoa?.individualId === poa?.individualId)) || [];
 
@@ -3497,7 +3478,7 @@ export const updateCaseDetails = async ({
           };
           updatedDoc.additionalDetails = additionalDetails;
         }
-        const updatedLitigant = { ...litigant, documents: lit?.pipAffidavitFileUpload ? [updatedDoc] : [] };
+        const updatedLitigant = { ...litigant, documents: lit?.pipAffidavitFileUpload ? [...litigant?.documents, updatedDoc] : litigant?.documents };
         return updatedLitigant;
       } else return litigant;
     });
@@ -3795,7 +3776,7 @@ export const transformCaseDataForFetching = (caseDetails, keys) => {
         const addressDetailsSelect = extractAddress(litigant?.permanentAddress, false);
         const currentAddressDetails = extractAddress(litigant?.currentAddress, true, true, litigant?.isSameAddress);
         const currentAddressDetailsSelect = extractAddress(litigant?.currentAddress, false);
-        const companyAddress = extractAddress(litigant?.companyAddress, false);
+        const companyAddress = extractAddress(litigant?.permanentAddress, false);
         const poaAddress = extractAddress(poaHolder?.address);
         const poaAddressSelect = extractAddress(poaHolder?.address, false);
 
@@ -3835,10 +3816,10 @@ export const transformCaseDataForFetching = (caseDetails, keys) => {
             complainantDesignation: litigant?.designation,
             addressCompanyDetails: companyAddress,
             "addressCompanyDetails-select": companyAddress,
-            companyDetailsUpload: companyProof ? [mapDocument(companyProof)] : [],
+            companyDetailsUpload: companyProof ? { document: [mapDocument(companyProof)] } : [],
           }),
           // POA holder details
-          ...(Object.keys(poaHolder).length > 0 && {
+          ...(Object?.keys(poaHolder)?.length > 0 && {
             poaFirstName: poaHolder?.firstName,
             poaMiddleName: poaHolder?.middleName,
             poaLastName: poaHolder?.lastName,
@@ -3848,6 +3829,7 @@ export const transformCaseDataForFetching = (caseDetails, keys) => {
             poaVerification: {
               mobileNumber: poaHolder?.mobileNumber,
               isUserVerified: true,
+              otpNumber: "123456",
               individualDetails: {
                 individualId: poaHolder?.individualId,
                 userUuid: poaHolder?.additionalDetails?.uuid,
@@ -3858,7 +3840,7 @@ export const transformCaseDataForFetching = (caseDetails, keys) => {
             },
             poaComplainantId: { poaComplainantId: true },
             poaAuthorizationDocument: {
-              poaDocument: mapDocument(poaAuthorizationProof),
+              poaDocument: [mapDocument(poaAuthorizationProof)],
             },
           }),
         };
