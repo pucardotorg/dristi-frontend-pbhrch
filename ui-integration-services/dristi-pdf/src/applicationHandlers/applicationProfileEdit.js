@@ -13,9 +13,7 @@ const {
   getNameByUuid,
   getComplaintAndAccusedList,
 } = require("./getCaseDetails");
-const {
-  transformCaseDataForFetching,
-} = require("../../../../oncourts-ui/micro-ui/web/micro-ui-internals/packages/modules/dristi/src/pages/citizen/FileCase/EfilingValidationUtils");
+const { transformCaseDataForFetching } = require("../utils/commonUtils");
 
 function getOrdinalSuffix(day) {
   if (day > 3 && day < 21) return "th"; // 11th, 12th, 13th, etc.
