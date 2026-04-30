@@ -12,8 +12,8 @@ const { DocumentError } = require("../util/errorUtils");
  * @param {string} fileStoreId - The ID of the file to fetch.
  * @returns {Buffer} The fetched document as a buffer.
  */
-async function fetchDocument(fileStoreId) {
-  const url = `${config.fileStoreHost}/filestore/v1/files/id?tenantId=kl&fileStoreId=${fileStoreId}`;
+async function fetchDocument(fileStoreId, tenantId) {
+  const url = `${config.fileStoreHost}/filestore/v1/files/id?tenantId=${tenantId}&fileStoreId=${fileStoreId}`;
 
   try {
     const response = await axios.get(url, { responseType: "arraybuffer" });
@@ -70,7 +70,12 @@ async function fetchDocument(fileStoreId) {
  * @param {string} header - The header to add to the page.
  * @returns {Promise<Buffer>} The updated PDF document as a buffer.
  */
-async function appendPdfPagesWithHeader(existingPdfDoc, fileStoreId, header) {
+async function appendPdfPagesWithHeader(
+  existingPdfDoc,
+  fileStoreId,
+  header,
+  tenantId,
+) {
   const helveticaFont = await existingPdfDoc.embedStandardFont("Helvetica");
 
   const headerPage = existingPdfDoc.addPage();
@@ -84,7 +89,7 @@ async function appendPdfPagesWithHeader(existingPdfDoc, fileStoreId, header) {
 
   let documentBytes = null;
   try {
-    documentBytes = await fetchDocument(fileStoreId);
+    documentBytes = await fetchDocument(fileStoreId, tenantId);
   } catch (error) {
     throw new DocumentError("DOCUMENT_CURRUPTED");
   }
@@ -119,7 +124,7 @@ async function appendPdfPagesWithHeader(existingPdfDoc, fileStoreId, header) {
  * @param {Array} complainants - The complainants object to append files from.
  * @returns {Promise<Buffer>} The updated PDF document.
  */
-async function appendComplainantFilesToPDF(pdf, complainants) {
+async function appendComplainantFilesToPDF(pdf, complainants, tenantId) {
   const existingPdfDoc = await PDFDocument.load(pdf);
 
   for (let i = 0; i < complainants.length; i++) {
@@ -128,7 +133,8 @@ async function appendComplainantFilesToPDF(pdf, complainants) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         complainant.companyDetailsFileStore,
-        `Authoriastion of Representative Document ${i + 1}`
+        `Authoriastion of Representative Document ${i + 1}`,
+        tenantId,
       );
     }
   }
@@ -143,7 +149,7 @@ async function appendComplainantFilesToPDF(pdf, complainants) {
  * @param {Array} respondents - The respondents object to append files from.
  * @returns {Promise<Buffer>} The updated PDF document.
  */
-async function appendRespondentFilesToPDF(pdf, respondents) {
+async function appendRespondentFilesToPDF(pdf, respondents, tenantId) {
   const existingPdfDoc = await PDFDocument.load(pdf);
 
   for (let i = 0; i < respondents.length; i++) {
@@ -152,14 +158,16 @@ async function appendRespondentFilesToPDF(pdf, respondents) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         respondent?.inquiryAffidavitFileStore,
-        `Inquiry Affidavit Document ${i + 1}`
+        `Inquiry Affidavit Document ${i + 1}`,
+        tenantId,
       );
     }
     if (respondent?.companyDetailsUpload) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         respondent?.companyDetailsUpload,
-        `Accused Company Document ${i + 1}`
+        `Accused Company Document ${i + 1}`,
+        tenantId,
       );
     }
   }
@@ -174,7 +182,7 @@ async function appendRespondentFilesToPDF(pdf, respondents) {
  * @param {Array} chequeDetails - The cheque details object to append files from.
  * @returns {Promise<Buffer>} The updated PDF document.
  */
-async function appendChequeDetailsToPDF(pdf, chequeDetails) {
+async function appendChequeDetailsToPDF(pdf, chequeDetails, tenantId) {
   const existingPdfDoc = await PDFDocument.load(pdf);
 
   for (let i = 0; i < chequeDetails.length; i++) {
@@ -184,21 +192,24 @@ async function appendChequeDetailsToPDF(pdf, chequeDetails) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         chequeDetail.bouncedChequeFileStore,
-        `Bounced Cheque Document ${i + 1}`
+        `Bounced Cheque Document ${i + 1}`,
+        tenantId,
       );
     }
     if (chequeDetail.depositChequeFileStore) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         chequeDetail.depositChequeFileStore,
-        `Deposit Cheque Document ${i + 1}`
+        `Deposit Cheque Document ${i + 1}`,
+        tenantId,
       );
     }
     if (chequeDetail.returnMemoFileStore) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         chequeDetail.returnMemoFileStore,
-        `Return Memo Document ${i + 1}`
+        `Return Memo Document ${i + 1}`,
+        tenantId,
       );
     }
   }
@@ -213,7 +224,11 @@ async function appendChequeDetailsToPDF(pdf, chequeDetails) {
  * @param {Array} debtLiabilityDetails - The debt liability details object to append files from.
  * @returns {Promise<Buffer>} The updated PDF document.
  */
-async function appendDebtLiabilityFilesToPDF(pdf, debtLiabilityDetails) {
+async function appendDebtLiabilityFilesToPDF(
+  pdf,
+  debtLiabilityDetails,
+  tenantId,
+) {
   const existingPdfDoc = await PDFDocument.load(pdf);
 
   for (let i = 0; i < debtLiabilityDetails.length; i++) {
@@ -222,7 +237,8 @@ async function appendDebtLiabilityFilesToPDF(pdf, debtLiabilityDetails) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         debtLiability.proofOfLiabilityFileStore,
-        `Debt Liability Document ${i + 1}`
+        `Debt Liability Document ${i + 1}`,
+        tenantId,
       );
     }
   }
@@ -237,7 +253,11 @@ async function appendDebtLiabilityFilesToPDF(pdf, debtLiabilityDetails) {
  * @param {Array} demandNoticeDetails - The demand notice details object to append files from.
  * @returns {Promise<Buffer>} The updated PDF document.
  */
-async function appendDemandNoticeFilesToPDF(pdf, demandNoticeDetails) {
+async function appendDemandNoticeFilesToPDF(
+  pdf,
+  demandNoticeDetails,
+  tenantId,
+) {
   const existingPdfDoc = await PDFDocument.load(pdf);
 
   for (let i = 0; i < demandNoticeDetails.length; i++) {
@@ -247,28 +267,32 @@ async function appendDemandNoticeFilesToPDF(pdf, demandNoticeDetails) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         demandNotice.legalDemandNoticeFileStore,
-        `Demand Notice Document ${i + 1}`
+        `Demand Notice Document ${i + 1}`,
+        tenantId,
       );
     }
     if (demandNotice.proofOfDispatchFileStore) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         demandNotice.proofOfDispatchFileStore,
-        `Proof of Dispatch Document ${i + 1}`
+        `Proof of Dispatch Document ${i + 1}`,
+        tenantId,
       );
     }
     if (demandNotice.proofOfAcknowledgmentFileStore) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         demandNotice.proofOfAcknowledgmentFileStore,
-        `Proof of Acknowledgment Document ${i + 1}`
+        `Proof of Acknowledgment Document ${i + 1}`,
+        tenantId,
       );
     }
     if (demandNotice.proofOfReplyFileStore) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         demandNotice.proofOfReplyFileStore,
-        `Proof of Reply Document ${i + 1}`
+        `Proof of Reply Document ${i + 1}`,
+        tenantId,
       );
     }
   }
@@ -283,7 +307,11 @@ async function appendDemandNoticeFilesToPDF(pdf, demandNoticeDetails) {
  * @param {Array} delayCondonationDetails - The delay condonation details object to append files from.
  * @returns {Promise<Buffer>} The updated PDF document.
  */
-async function appendDelayCondonationFilesToPDF(pdf, delayCondonationDetails) {
+async function appendDelayCondonationFilesToPDF(
+  pdf,
+  delayCondonationDetails,
+  tenantId,
+) {
   const existingPdfDoc = await PDFDocument.load(pdf);
 
   for (let i = 0; i < delayCondonationDetails.length; i++) {
@@ -292,7 +320,8 @@ async function appendDelayCondonationFilesToPDF(pdf, delayCondonationDetails) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         delayCondonation.delayCondonationFileStore,
-        `Delay Condonation Document ${i + 1}`
+        `Delay Condonation Document ${i + 1}`,
+        tenantId,
       );
     }
   }
@@ -307,7 +336,11 @@ async function appendDelayCondonationFilesToPDF(pdf, delayCondonationDetails) {
  * @param {Array} prayerSwornStatementDetails - The prayer and sworn statement details object to append files from.
  * @returns {Promise<Buffer>} The updated PDF document.
  */
-async function appendPrayerSwornFilesToPDF(pdf, prayerSwornStatementDetails) {
+async function appendPrayerSwornFilesToPDF(
+  pdf,
+  prayerSwornStatementDetails,
+  tenantId,
+) {
   const existingPdfDoc = await PDFDocument.load(pdf);
 
   for (let i = 0; i < prayerSwornStatementDetails.length; i++) {
@@ -317,21 +350,24 @@ async function appendPrayerSwornFilesToPDF(pdf, prayerSwornStatementDetails) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         prayerSworn.memorandumOfComplaintFileStore,
-        `Complaint ${i + 1}`
+        `Complaint ${i + 1}`,
+        tenantId,
       );
     }
     if (prayerSworn.prayerForReliefFileStore) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         prayerSworn.prayerForReliefFileStore,
-        `Prayer for Relief Document ${i + 1}`
+        `Prayer for Relief Document ${i + 1}`,
+        tenantId,
       );
     }
     if (prayerSworn.swornStatement) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         prayerSworn.swornStatement,
-        `Affidavit under section 223 of BNSS ${i + 1}`
+        `Affidavit under section 223 of BNSS ${i + 1}`,
+        tenantId,
       );
     }
     if (prayerSworn?.complaintAdditionalDocumentFileStore?.length > 0) {
@@ -343,7 +379,8 @@ async function appendPrayerSwornFilesToPDF(pdf, prayerSwornStatementDetails) {
         await appendPdfPagesWithHeader(
           existingPdfDoc,
           prayerSworn?.complaintAdditionalDocumentFileStore?.[j],
-          `Complaint Additional Document ${j + 1}`
+          `Complaint Additional Document ${j + 1}`,
+          tenantId,
         );
       }
     }
@@ -359,7 +396,7 @@ async function appendPrayerSwornFilesToPDF(pdf, prayerSwornStatementDetails) {
  * @param {Array} advocates - The advocates object to append files from.
  * @returns {Promise<Buffer>} The updated PDF document.
  */
-async function appendAdvocateFilesToPDF(pdf, advocates) {
+async function appendAdvocateFilesToPDF(pdf, advocates, tenantId) {
   const existingPdfDoc = await PDFDocument.load(pdf);
 
   let vakalatnamaCount = 0;
@@ -378,7 +415,8 @@ async function appendAdvocateFilesToPDF(pdf, advocates) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         advocate.vakalatnamaFileStore,
-        `Vakalatnama Document ${vakalatnamaCount}`
+        `Vakalatnama Document ${vakalatnamaCount}`,
+        tenantId,
       );
     } else if (
       advocate.pipAffidavitFileStore &&
@@ -389,7 +427,8 @@ async function appendAdvocateFilesToPDF(pdf, advocates) {
       await appendPdfPagesWithHeader(
         existingPdfDoc,
         advocate.pipAffidavitFileStore,
-        `Affidavit Document ${affidavitCount}`
+        `Affidavit Document ${affidavitCount}`,
+        tenantId,
       );
     }
   }
@@ -397,10 +436,10 @@ async function appendAdvocateFilesToPDF(pdf, advocates) {
   return await existingPdfDoc.save();
 }
 
-async function validateDocuments(docs) {
+async function validateDocuments(docs, tenantId) {
   for (const doc of docs) {
     try {
-      const documentBytes = await fetchDocument(doc?.fileStore);
+      const documentBytes = await fetchDocument(doc?.fileStore, tenantId);
     } catch (error) {
       throw new DocumentError(doc?.documentType);
     }

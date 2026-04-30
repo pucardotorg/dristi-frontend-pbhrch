@@ -2,10 +2,6 @@ import axios from "axios";
 import envVariables from "../EnvironmentVariables";
 import logger from "../config/logger";
 
-/**
- * Extract the state-level tenantId (first segment before '.').
- * e.g. "kl.ernakulam" -> "kl"
- */
 const getStateTenantId = (tenantId) => {
   if (!tenantId) return tenantId;
   return String(tenantId).split(".")[0];
@@ -51,7 +47,7 @@ export const fetchPdfConfigFromMdms = async (key, tenantId, requestInfo) => {
       error: err.message,
     });
     throw new Error(
-      `Failed to fetch PDF config from MDMS for key '${key}': ${err.message}`
+      `Failed to fetch PDF config from MDMS for key '${key}': ${err.message}`,
     );
   }
 
@@ -67,7 +63,7 @@ export const fetchPdfConfigFromMdms = async (key, tenantId, requestInfo) => {
 
   if (!dataConfig || !formatConfig) {
     throw new Error(
-      `Incomplete PDF config in MDMS for key '${key}': missing data-config or format-config`
+      `Incomplete PDF config in MDMS for key '${key}': missing data-config or format-config`,
     );
   }
 

@@ -27,15 +27,15 @@ exports.generateCasePdf = async (req, res, next) => {
     const accuseds = caseService.getRespondentsDetailsForComplaint(caseData);
     const advocates = caseService.getAdvocateDetailsForComplainant(caseData);
     const prayer = htmlToFormattedText(
-      caseService.getPrayerSwornStatementDetails(caseData)?.[0]?.prayer
+      caseService.getPrayerSwornStatementDetails(caseData)?.[0]?.prayer,
     );
     const complaint = htmlToFormattedText(
       caseService.getPrayerSwornStatementDetails(caseData)?.[0]
-        ?.memorandumOfComplaintText
+        ?.memorandumOfComplaintText,
     );
 
     const dateOfFiling = caseService.formatDate(
-      caseData?.filingDate ? new Date(caseData?.filingDate) : new Date()
+      caseData?.filingDate ? new Date(caseData?.filingDate) : new Date(),
     );
     const documentList = caseService.getDocumentList(caseData);
     const witnessScheduleList =
@@ -51,7 +51,7 @@ exports.generateCasePdf = async (req, res, next) => {
       caseService.getPrayerSwornStatementDetails(caseData);
     const placeholderList = caseService.getComplainantPlaceholderList(caseData);
     const synopsis = htmlToFormattedText(
-      caseService.getPrayerSwornStatementDetails(caseData)?.[0]?.synopsisText
+      caseService.getPrayerSwornStatementDetails(caseData)?.[0]?.synopsisText,
     );
 
     const pdfRequest = {
@@ -75,35 +75,55 @@ exports.generateCasePdf = async (req, res, next) => {
     };
 
     console.log("Pdf Request: {}", pdfRequest);
-    await fileService.validateDocuments(caseData?.documents || []);
-    const pdf = await pdfService.generateComplaintPDF(pdfRequest);
+    await fileService.validateDocuments(
+      caseData?.documents || [],
+      caseData?.tenantId,
+    );
+    const pdf = await pdfService.generateComplaintPDF(
+      pdfRequest,
+      caseData?.tenantId,
+    );
 
     let finalPdf = await fileService.appendComplainantFilesToPDF(
       pdf,
-      complainants
+      complainants,
+      caseData?.tenantId,
     );
-    finalPdf = await fileService.appendRespondentFilesToPDF(finalPdf, accuseds);
+    finalPdf = await fileService.appendRespondentFilesToPDF(
+      finalPdf,
+      accuseds,
+      caseData?.tenantId,
+    );
     finalPdf = await fileService.appendChequeDetailsToPDF(
       finalPdf,
-      chequeDetails
+      chequeDetails,
+      caseData?.tenantId,
     );
     finalPdf = await fileService.appendDebtLiabilityFilesToPDF(
       finalPdf,
-      debtLiabilityDetails
+      debtLiabilityDetails,
+      caseData?.tenantId,
     );
     finalPdf = await fileService.appendDemandNoticeFilesToPDF(
       finalPdf,
-      demandNoticeDetails
+      demandNoticeDetails,
+      caseData?.tenantId,
     );
     finalPdf = await fileService.appendDelayCondonationFilesToPDF(
       finalPdf,
-      delayCondonationDetails
+      delayCondonationDetails,
+      caseData?.tenantId,
     );
     finalPdf = await fileService.appendPrayerSwornFilesToPDF(
       finalPdf,
-      prayerSwornStatementDetails
+      prayerSwornStatementDetails,
+      caseData?.tenantId,
     );
-    finalPdf = await fileService.appendAdvocateFilesToPDF(finalPdf, advocates);
+    finalPdf = await fileService.appendAdvocateFilesToPDF(
+      finalPdf,
+      advocates,
+      caseData?.tenantId,
+    );
 
     const finalPdfBuffer = Buffer.from(finalPdf);
     console.log("Pdf Generated Successfully");
@@ -111,7 +131,7 @@ exports.generateCasePdf = async (req, res, next) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      'attachment; filename="caseDetails.pdf"'
+      'attachment; filename="caseDetails.pdf"',
     );
     res.send(finalPdfBuffer);
   } catch (error) {
@@ -140,21 +160,21 @@ exports.caseComplaintPdf = async (req, res, next) => {
       caseService.getComplainantsDetailsForComplaint(caseData);
     const accuseds = caseService.getRespondentsDetailsForComplaint(caseData);
     const prayer = htmlToFormattedText(
-      caseService.getPrayerSwornStatementDetails(caseData)?.[0]?.prayer
+      caseService.getPrayerSwornStatementDetails(caseData)?.[0]?.prayer,
     );
     const complaint = htmlToFormattedText(
       caseService.getPrayerSwornStatementDetails(caseData)?.[0]
-        ?.memorandumOfComplaintText
+        ?.memorandumOfComplaintText,
     );
     const dateOfFiling = caseService.formatDate(
-      caseData?.filingDate ? new Date(caseData?.filingDate) : new Date()
+      caseData?.filingDate ? new Date(caseData?.filingDate) : new Date(),
     );
     const documentList = caseService.getDocumentList(caseData);
     const witnessScheduleList =
       caseService.getWitnessDetailsForComplaint(caseData);
     const placeholderList = caseService.getComplainantPlaceholderList(caseData);
     const synopsis = htmlToFormattedText(
-      caseService.getPrayerSwornStatementDetails(caseData)?.[0]?.synopsisText
+      caseService.getPrayerSwornStatementDetails(caseData)?.[0]?.synopsisText,
     );
 
     const pdfRequest = {
@@ -178,7 +198,10 @@ exports.caseComplaintPdf = async (req, res, next) => {
     };
 
     console.log("Pdf Request: {}", pdfRequest);
-    const pdf = await pdfService.generateComplaintPDF(pdfRequest);
+    const pdf = await pdfService.generateComplaintPDF(
+      pdfRequest,
+      caseData?.tenantId,
+    );
 
     const finalPdfBuffer = Buffer.from(pdf);
     console.log("Pdf Generated Successfully");
@@ -186,7 +209,7 @@ exports.caseComplaintPdf = async (req, res, next) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      'attachment; filename="caseComplaintDetails.pdf"'
+      'attachment; filename="caseComplaintDetails.pdf"',
     );
     res.send(finalPdfBuffer);
   } catch (error) {
