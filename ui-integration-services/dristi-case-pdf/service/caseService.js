@@ -348,8 +348,10 @@ function getComplainantsDetailsForComplaint(cases) {
       const allAdvocateDetails = getAdvocateDetailsForComplainant(cases);
       const currentAdvocateDetails = allAdvocateDetails?.find(
         (advocateDetails) =>
-          advocateDetails?.individualId ===
-          data?.complainantVerification?.individualDetails?.individualId,
+          advocateDetails?.individualId === complainant?.individualId,
+      );
+      const complainantIdProof = complainant?.documents?.find(
+        (doc) => doc?.documentType === "COMPLAINANT_ID_PROOF",
       );
 
       if (litigantType.code === "REPRESENTATIVE") {
