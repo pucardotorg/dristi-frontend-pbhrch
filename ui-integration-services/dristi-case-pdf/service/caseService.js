@@ -340,7 +340,7 @@ function getComplainantsDetailsForComplaint(cases) {
   return cases?.litigants
     ?.filter((lit) => lit?.partyType?.includes("complainant"))
     ?.map((complainant) => {
-      const complainantType = complainant?.complainantType || "";
+      const litigantType = complainant?.litigantType || "";
       const firstName = complainant?.firstName || "";
       const middleName = complainant?.middleName || "";
       const lastName = complainant?.lastName || "";
@@ -352,9 +352,9 @@ function getComplainantsDetailsForComplaint(cases) {
           data?.complainantVerification?.individualDetails?.individualId,
       );
 
-      if (complainantType.code === "REPRESENTATIVE") {
+      if (litigantType.code === "REPRESENTATIVE") {
         const companyAddress = getStringAddressDetails(
-          complainant.companyAddress,
+          complainant.permanentAddress,
         );
 
         return {

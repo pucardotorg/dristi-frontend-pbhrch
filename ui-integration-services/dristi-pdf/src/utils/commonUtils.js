@@ -162,11 +162,11 @@ function transformCaseDataForFetching(caseDetails, keys) {
         const companyProof = litigant?.documents?.find(
           (doc) => doc?.documentType === "case.authorizationproof.complainant",
         );
-        const poaIdProof = poaHolder?.documents?.find(
-          (doc) => doc?.documentType === "POA_COMPLAINANT_ID_PROOF",
-        );
         const representingLitigant = poaHolder?.representingLitigants?.find(
           (lit) => lit?.individualId === litigant?.individualId,
+        );
+        const poaIdProof = representingLitigant?.documents?.find(
+          (doc) => doc?.documentType === "POA_COMPLAINANT_ID_PROOF",
         );
         const poaAuthorizationProof =
           representingLitigant?.documents?.find(
@@ -174,13 +174,14 @@ function transformCaseDataForFetching(caseDetails, keys) {
           ) || null;
 
         const isRepresentative =
-          litigant?.complainantType?.code === "REPRESENTATIVE";
+          litigant?.litigantType?.code === "REPRESENTATIVE";
 
         // Helper function to extract address fields
         const extractAddress = (
           address,
           includeCoordinates = true,
           includeIsCurrAddrSame = false,
+          isSameAddress,
         ) => {
           if (!address) return null;
           const result = {
@@ -194,7 +195,12 @@ function transformCaseDataForFetching(caseDetails, keys) {
             result.coordinates = address?.coordinates;
           }
           if (includeIsCurrAddrSame) {
-            result.isCurrAddrSame = address?.isCurrAddrSame;
+            const value = isSameAddress ? "YES" : "NO";
+
+            result.isCurrAddrSame = {
+              code: value,
+              name: value,
+            };
           }
           return result;
         };
@@ -219,12 +225,16 @@ function transformCaseDataForFetching(caseDetails, keys) {
           litigant?.currentAddress,
           true,
           true,
+          litigant?.isSameAddress,
         );
         const currentAddressDetailsSelect = extractAddress(
           litigant?.currentAddress,
           false,
         );
-        const companyAddress = extractAddress(litigant?.companyAddress, false);
+        const companyAddress = extractAddress(
+          litigant?.permanentAddress,
+          false,
+        );
         const poaAddress = extractAddress(poaHolder?.address);
         const poaAddressSelect = extractAddress(poaHolder?.address, false);
 
@@ -233,12 +243,13 @@ function transformCaseDataForFetching(caseDetails, keys) {
           middleName: litigant?.middleName,
           lastName: litigant?.lastName,
           complainantAge: litigant?.age,
-          complainantType: litigant?.complainantType,
-          complainantTypeOfEntity: litigant?.complainantTypeOfEntity,
+          complainantType: litigant?.litigantType,
+          complainantTypeOfEntity: litigant?.litigantTypeOfEntity,
           transferredPOA: litigant?.transferredPOA,
           complainantVerification: {
-            mobileNumber: litigant?.mobileNumber?.[0],
+            mobileNumber: litigant?.mobileNumber?.[0] || "",
             isUserVerified: true,
+            otpNumber: "123456",
             individualDetails: {
               individualId: litigant?.individualId,
               userUuid: litigant?.additionalDetails?.uuid,
@@ -274,11 +285,11 @@ function transformCaseDataForFetching(caseDetails, keys) {
             addressCompanyDetails: companyAddress,
             "addressCompanyDetails-select": companyAddress,
             companyDetailsUpload: companyProof
-              ? [mapDocument(companyProof)]
+              ? { document: [mapDocument(companyProof)] }
               : [],
           }),
           // POA holder details
-          ...(poaHolder && {
+          ...(Object?.keys(poaHolder)?.length > 0 && {
             poaFirstName: poaHolder?.firstName,
             poaMiddleName: poaHolder?.middleName,
             poaLastName: poaHolder?.lastName,
@@ -288,6 +299,7 @@ function transformCaseDataForFetching(caseDetails, keys) {
             poaVerification: {
               mobileNumber: poaHolder?.mobileNumber,
               isUserVerified: true,
+              otpNumber: "123456",
               individualDetails: {
                 individualId: poaHolder?.individualId,
                 userUuid: poaHolder?.additionalDetails?.uuid,
@@ -298,7 +310,7 @@ function transformCaseDataForFetching(caseDetails, keys) {
             },
             poaComplainantId: { poaComplainantId: true },
             poaAuthorizationDocument: {
-              poaDocument: mapDocument(poaAuthorizationProof),
+              poaDocument: [mapDocument(poaAuthorizationProof)],
             },
           }),
         };

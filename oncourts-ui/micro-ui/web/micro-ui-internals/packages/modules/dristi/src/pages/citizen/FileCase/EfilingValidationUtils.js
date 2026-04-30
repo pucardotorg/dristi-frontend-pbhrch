@@ -2058,7 +2058,6 @@ export const updateCaseDetails = async ({
               transferredPOA: data?.data?.transferredPOA,
               permanentAddress: isRepresentative ? data?.data?.addressCompanyDetails : data?.data?.addressDetails,
               currentAddress: isRepresentative ? null : data?.data?.currentAddressDetails,
-              companyAddress: isRepresentative ? data?.data?.addressCompanyDetails : null,
               additionalDetails: {
                 uuid: null,
                 currentPosition: index + 1,
