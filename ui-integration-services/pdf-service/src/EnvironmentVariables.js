@@ -32,12 +32,13 @@ const envVariables = {
   DEFAULT_LOCALISATION_LOCALE:
     process.env.DEFAULT_LOCALISATION_LOCALE || "en_IN",
   DEFAULT_LOCALISATION_TENANT: process.env.DEFAULT_LOCALISATION_TENANT || "pb",
-  DATA_CONFIG_URLS:
-    process.env.DATA_CONFIG_URLS ||
-    "https://raw.githubusercontent.com/pucardotorg/kerala-configs/develop/pdf-service/data-config/case.json",
-  FORMAT_CONFIG_URLS:
-    process.env.FORMAT_CONFIG_URLS ||
-    "https://raw.githubusercontent.com/pucardotorg/kerala-configs/develop/pdf-service/format-config/case.json",
+  EGOV_MDMS_HOST:
+    process.env.EGOV_MDMS_HOST || "http://localhost:8081/",
+  EGOV_MDMS_V2_SEARCH_ENDPOINT:
+    process.env.EGOV_MDMS_V2_SEARCH_ENDPOINT ||
+    "egov-mdms-service/v2/_search",
+  PDF_MDMS_SCHEMA_CODE:
+    process.env.PDF_MDMS_SCHEMA_CODE || "pdfservice.pdfconfig",
   STATE_LEVEL_TENANT_ID: "in.stateb",
   DEFAULT_VARIABLE_VALUE:
     process.env.DEFAULT_VARIABLE_VALUE === undefined ||
