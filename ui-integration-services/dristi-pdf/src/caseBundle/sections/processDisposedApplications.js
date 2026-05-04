@@ -52,6 +52,7 @@ async function processDisposedApplications(
   const applicationsIndexSection = indexCopy.sections?.find(
     (section) => section.name === "applications"
   );
+  if (!applicationsIndexSection) return;
 
   if (applicationSection?.length !== 0) {
     const section = applicationSection[0];

@@ -28,6 +28,7 @@ async function processPaymentReceipts(
   const paymentReceiptsIndexSection = indexCopy.sections?.find(
     (section) => section.name === "paymentreceipts"
   );
+  if (!paymentReceiptsIndexSection) return;
 
   const dynamicSectionNumber = getDynamicSectionNumber(
     indexCopy,

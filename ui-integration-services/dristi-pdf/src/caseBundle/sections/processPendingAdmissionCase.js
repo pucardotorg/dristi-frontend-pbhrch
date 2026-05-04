@@ -62,7 +62,7 @@ function applyMdmsSectionOrder(indexCopy, sectionOrderConfig) {
     const sectionName = SECTION_KEY_MAP[entry.sectionKey];
     if (!sectionName) continue;
     orderMap[sectionName] = parseInt(entry.order, 10);
-    if (entry.isActive === false) {
+    if (!entry.isActive) {
       inactiveSections.add(sectionName);
     }
   }
@@ -96,7 +96,7 @@ async function processPendingAdmissionCase({
     search_mdms(null, "CaseManagement.case_bundle_master", tenantId, requestInfo)
       .then((mdmsRes) => mdmsRes.data.mdms.filter((x) => x.isActive).map((x) => x.data)),
     search_mdms(null, "CaseManagement.CaseBundleSectionOrder", tenantId, requestInfo)
-      .then((mdmsRes) => mdmsRes.data.mdms.filter((x) => x.isActive).map((x) => x.data))
+      .then((mdmsRes) => mdmsRes.data.mdms.map((x) => ({ ...x.data, isActive: x.isActive })))
       .catch((err) => {
         logger.warn("Failed to fetch CaseBundleSectionOrder from MDMS, using default section order:", err.message);
         return [];

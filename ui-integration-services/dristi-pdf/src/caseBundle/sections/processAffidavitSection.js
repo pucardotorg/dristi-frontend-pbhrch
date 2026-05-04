@@ -120,6 +120,7 @@ async function processAffidavitSection(
   const affidavitsIndexSection = indexCopy.sections?.find(
     (section) => section.name === "affidavit"
   );
+  if (!affidavitsIndexSection) return;
   affidavitsIndexSection.lineItems = affidavitsLineItems?.filter(Boolean);
 }
 

@@ -19,6 +19,7 @@ async function processOrders(
   const ordersIndexSection = indexCopy.sections?.find(
     (section) => section.name === "orders"
   );
+  if (!ordersIndexSection) return;
 
   if (processesSection?.length !== 0) {
     const section = processesSection[0];

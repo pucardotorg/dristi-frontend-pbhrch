@@ -217,6 +217,7 @@ async function processMandatorySubmissions(
   const mandatorySubmissionsIndexSection = indexCopy.sections?.find(
     (section) => section.name === "mandatorysubmissions"
   );
+  if (!mandatorySubmissionsIndexSection) return;
   mandatorySubmissionsIndexSection.lineItems =
     mandatorySubmissionsLineItems?.filter(Boolean);
 }
