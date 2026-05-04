@@ -59,6 +59,7 @@ function applyMdmsSectionOrder(indexCopy, sectionOrderConfig) {
   const inactiveSections = new Set();
 
   for (const entry of sectionOrderConfig) {
+    logger.info(`Processing MDMS section order entry: ${JSON.stringify(entry)} , entry.isActive: ${entry.isActive}`);
     const sectionName = SECTION_KEY_MAP[entry.sectionKey];
     if (!sectionName) continue;
     orderMap[sectionName] = parseInt(entry.order, 10);
@@ -70,6 +71,18 @@ function applyMdmsSectionOrder(indexCopy, sectionOrderConfig) {
   indexCopy.sections = indexCopy.sections.filter(
     (s) => !inactiveSections.has(s.name)
   );
+
+  // Re-add sections that became active in MDMS but were previously removed from the stored index
+  const existingNames = new Set(indexCopy.sections.map((s) => s.name));
+  for (const entry of sectionOrderConfig) {
+    if (entry.isActive) {
+      const sectionName = SECTION_KEY_MAP[entry.sectionKey];
+      if (sectionName && !existingNames.has(sectionName)) {
+        indexCopy.sections.push({ name: sectionName, lineItems: [] });
+        existingNames.add(sectionName);
+      }
+    }
+  }
 
   const titlepage = indexCopy.sections.find((s) => s.name === "titlepage");
   const rest = indexCopy.sections.filter((s) => s.name !== "titlepage");
@@ -96,7 +109,7 @@ async function processPendingAdmissionCase({
     search_mdms(null, "CaseManagement.case_bundle_master", tenantId, requestInfo)
       .then((mdmsRes) => mdmsRes.data.mdms.filter((x) => x.isActive).map((x) => x.data)),
     search_mdms(null, "CaseManagement.CaseBundleSectionOrder", tenantId, requestInfo)
-      .then((mdmsRes) => mdmsRes.data.mdms.map((x) => ({ ...x.data, isActive: x.isActive })))
+      .then((mdmsRes) => mdmsRes.data.mdms.map((x) => ({ ...x.data })))
       .catch((err) => {
         logger.warn("Failed to fetch CaseBundleSectionOrder from MDMS, using default section order:", err.message);
         return [];
