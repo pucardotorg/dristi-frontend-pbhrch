@@ -26,7 +26,7 @@ function ReviewNoticeModal({ t, handleCloseNoticeModal, rowData, infos }) {
   };
 
   const combinedDoc = useMemo(() => {
-    return [policeDoc, doc];
+    return [policeDoc, doc].filter((d) => d?.fileStore);
   }, [doc, policeDoc]);
 
   const showDocument = useMemo(() => {
@@ -38,8 +38,8 @@ function ReviewNoticeModal({ t, handleCloseNoticeModal, rowData, infos }) {
           flexDirection: "column",
           alignItems: "center",
           width: "100%",
-          maxHeight: "60vh",
-          maxWidth: "100%",
+          flex: 1,
+          minHeight: 0,
           overflowY: "auto",
           overflowX: "hidden",
         }}
@@ -50,6 +50,7 @@ function ReviewNoticeModal({ t, handleCloseNoticeModal, rowData, infos }) {
               key={docs?.fileStore}
               docWidth={"calc(95vw * 62 / 100)"}
               docHeight={"unset"}
+              disableInnerViewerScroll={true}
               fileStoreId={docs?.fileStore}
               tenantId={tenantId}
               displayFilename={docs?.additionalDetails?.name}
@@ -86,11 +87,12 @@ function ReviewNoticeModal({ t, handleCloseNoticeModal, rowData, infos }) {
       actionSaveLabel={null}
       hideSubmit={true}
       actionSaveOnSubmit={() => {}}
-      popupStyles={{ minWidth: "880px", width: "80%" }}
+      popupStyles={{ width: "90vw", height: "90vh", maxHeight: "90vh", display: "flex", flexDirection: "column" }}
+      popupModuleMianStyles={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden", padding: "0 24px 24px" }}
     >
       {infos && <ApplicationInfoComponent infos={infos} />}
       {showDocument}
-      <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center", marginTop: "16px" }}>
+      <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center", marginTop: "16px", flexShrink: 0 }}>
         <div
           onClick={() => {
             handleDownload(tenantId, doc?.fileStore, policeDoc?.fileStore);
