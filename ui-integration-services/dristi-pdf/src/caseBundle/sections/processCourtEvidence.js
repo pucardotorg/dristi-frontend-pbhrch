@@ -148,6 +148,7 @@ async function processCourtEvidence(
   const courtEvidenceIndexSection = indexCopy.sections?.find(
     (section) => section.name === "courtevidence"
   );
+  if (!courtEvidenceIndexSection) return;
   courtEvidenceIndexSection.lineItems = courtEvidenceLineItems?.filter(Boolean);
 }
 

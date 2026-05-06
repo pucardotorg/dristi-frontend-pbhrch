@@ -76,6 +76,7 @@ async function processComplaintSection(
     const complaintIndexSection = indexCopy.sections?.find(
       (section) => section.name === "complaint"
     );
+    if (!complaintIndexSection) return;
     complaintIndexSection.lineItems = complaintIndexSection.lineItems || [];
     complaintIndexSection.lineItems[0] = {
       ...complaintIndexSection.lineItems[0],

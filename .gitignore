@@ -36,3 +36,6 @@ oncourts-ui/micro-ui/web/micro-ui-internals/node_modules/*
 .factorypath
 .project
 .settings/
+
+# Claude Code local settings
+.claude/settings.json

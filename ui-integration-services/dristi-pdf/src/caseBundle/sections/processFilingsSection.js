@@ -93,6 +93,7 @@ async function processFilingsSection(
   const filingsIndexSection = indexCopy.sections?.find(
     (section) => section.name === "filings"
   );
+  if (!filingsIndexSection) return;
   filingsIndexSection.lineItems = filingsLineItems?.filter(Boolean);
 }
 

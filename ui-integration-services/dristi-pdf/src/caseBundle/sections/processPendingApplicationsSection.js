@@ -42,6 +42,7 @@ async function processPendingApplicationsSection(
   const pendingApplicationsIndexSection = indexCopy.sections?.find(
     (section) => section.name === "pendingapplications"
   );
+  if (!pendingApplicationsIndexSection) return;
 
   const dynamicSectionNumber = getDynamicSectionNumber(
     indexCopy,

@@ -22,6 +22,7 @@ async function processTaskProcesses(
   const processesIndexSection = indexCopy.sections?.find(
     (section) => section.name === "processes"
   );
+  if (!processesIndexSection) return;
 
   if (processesSection?.length !== 0) {
     const resTask = await search_table_task(

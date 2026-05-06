@@ -237,6 +237,7 @@ async function processComplainantEvidence(
   const complainantEvidenceIndexSection = indexCopy.sections?.find(
     (section) => section.name === "complainantevidence"
   );
+  if (!complainantEvidenceIndexSection) return;
   complainantEvidenceIndexSection.lineItems =
     complainantEvidenceLineItems?.filter(Boolean);
 }

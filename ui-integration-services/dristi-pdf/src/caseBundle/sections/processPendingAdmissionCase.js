@@ -26,6 +26,76 @@ const { processOrders } = require("./processOrders");
 const { processExamination } = require("./processExamination");
 const { processOthersSection } = require("./processOthersSection");
 
+// Maps backend Java class simple names (used as sectionKey in CaseBundleSectionOrder MDMS)
+// to the section name strings used in indexCopy.sections
+const SECTION_KEY_MAP = {
+  ComplaintSection: "complaint",
+  PendingApplicationsSection: "pendingapplications",
+  InitialFilingSection: "filings",
+  AffidavitSection: "affidavit",
+  VakalatnamaSection: "vakalat",
+  AdditionalFilingsSection: "additionalfilings",
+  MandatorySubmissionsSection: "mandatorysubmissions",
+  ComplainantEvidenceSection: "complainantevidence",
+  AccusedEvidenceSection: "accusedevidence",
+  CourtEvidenceSection: "courtevidence",
+  DisposedApplicationsSection: "applications",
+  ProcessesSection: "processes",
+  PaymentReceiptSection: "paymentreceipts",
+  ExaminationAndPleaSection: "digitalizedDocuments",
+  OrdersSection: "orders",
+  OthersSection: "others",
+};
+
+/**
+ * Reorders and filters indexCopy.sections based on CaseBundleSectionOrder MDMS config.
+ * Titlepage always stays first. Sections not present in MDMS retain their relative order
+ * at the end. Sections marked isActive=false in MDMS are removed.
+ */
+function applyMdmsSectionOrder(indexCopy, sectionOrderConfig) {
+  if (!sectionOrderConfig || sectionOrderConfig.length === 0) return;
+
+  const orderMap = {};
+  const inactiveSections = new Set();
+
+  for (const entry of sectionOrderConfig) {
+    logger.info(`Processing MDMS section order entry: ${JSON.stringify(entry)} , entry.isActive: ${entry.isActive}`);
+    const sectionName = SECTION_KEY_MAP[entry.sectionKey];
+    if (!sectionName) continue;
+    orderMap[sectionName] = parseInt(entry.order, 10);
+    if (!entry.isActive) {
+      inactiveSections.add(sectionName);
+    }
+  }
+
+  indexCopy.sections = indexCopy.sections.filter(
+    (s) => !inactiveSections.has(s.name)
+  );
+
+  // Re-add sections that became active in MDMS but were previously removed from the stored index
+  const existingNames = new Set(indexCopy.sections.map((s) => s.name));
+  for (const entry of sectionOrderConfig) {
+    if (entry.isActive) {
+      const sectionName = SECTION_KEY_MAP[entry.sectionKey];
+      if (sectionName && !existingNames.has(sectionName)) {
+        indexCopy.sections.push({ name: sectionName, lineItems: [] });
+        existingNames.add(sectionName);
+      }
+    }
+  }
+
+  const titlepage = indexCopy.sections.find((s) => s.name === "titlepage");
+  const rest = indexCopy.sections.filter((s) => s.name !== "titlepage");
+
+  rest.sort((a, b) => {
+    const orderA = orderMap[a.name] !== undefined ? orderMap[a.name] : Number.MAX_SAFE_INTEGER;
+    const orderB = orderMap[b.name] !== undefined ? orderMap[b.name] : Number.MAX_SAFE_INTEGER;
+    return orderA - orderB;
+  });
+
+  indexCopy.sections = titlepage ? [titlepage, ...rest] : rest;
+}
+
 async function processPendingAdmissionCase({
   tenantId,
   caseId,
@@ -34,28 +104,23 @@ async function processPendingAdmissionCase({
   TEMP_FILES_DIR,
 }) {
   const indexCopy = cloneDeep(index);
-  const caseBundleMaster = await search_mdms(
-    null,
-    "CaseManagement.case_bundle_master",
-    tenantId,
-    requestInfo
-  ).then((mdmsRes) => {
-    return mdmsRes.data.mdms.filter((x) => x.isActive).map((x) => x.data);
-  });
 
-  const caseResponse = await search_case_v2(
-    [
-      {
-        caseId,
-      },
-    ],
-    tenantId,
-    requestInfo
-  );
+  const [caseBundleMaster, sectionOrderConfig, caseResponse] = await Promise.all([
+    search_mdms(null, "CaseManagement.case_bundle_master", tenantId, requestInfo)
+      .then((mdmsRes) => mdmsRes.data.mdms.filter((x) => x.isActive).map((x) => x.data)),
+    search_mdms(null, "CaseManagement.CaseBundleSectionOrder", tenantId, requestInfo)
+      .then((mdmsRes) => mdmsRes.data.mdms.map((x) => ({ ...x.data })))
+      .catch((err) => {
+        logger.warn("Failed to fetch CaseBundleSectionOrder from MDMS, using default section order:", err.message);
+        return [];
+      }),
+    search_case_v2([{ caseId }], tenantId, requestInfo),
+  ]);
+
   logger.info("recd case response", JSON.stringify(caseResponse?.data));
   const courtCase = caseResponse?.data?.criteria[0]?.responseList[0];
 
-  console.debug(caseBundleMaster);
+  applyMdmsSectionOrder(indexCopy, sectionOrderConfig);
 
   const resMessage = await search_message(
     tenantId,

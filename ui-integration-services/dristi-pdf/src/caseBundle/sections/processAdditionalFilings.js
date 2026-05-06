@@ -29,6 +29,7 @@ async function processAdditionalFilings(
   const additionalFilingsIndexSection = indexCopy.sections?.find(
     (section) => section.name === "additionalfilings"
   );
+  if (!additionalFilingsIndexSection) return;
 
   const dynamicSectionNumber = getDynamicSectionNumber(
     indexCopy,

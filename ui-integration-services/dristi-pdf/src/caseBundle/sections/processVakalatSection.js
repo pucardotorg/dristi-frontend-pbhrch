@@ -34,6 +34,7 @@ async function processVakalatSection(
   const vakalatsIndexSection = indexCopy.sections?.find(
     (section) => section.name === "vakalat"
   );
+  if (!vakalatsIndexSection) return;
 
   const litigants = courtCase?.litigants?.map((litigant) => ({
     ...litigant,

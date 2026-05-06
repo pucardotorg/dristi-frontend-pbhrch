@@ -1,9 +1,10 @@
 const { createLogger, format, transports } = require("winston");
 
-const myFormat = format.printf(({ level, message, label, timestamp }) => {
+const myFormat = format.printf(({ level, message, label, timestamp, ...meta }) => {
   const formattedMessage =
     typeof message === "string" ? message : JSON.stringify(message);
-  return `${timestamp} [${label}] [${level}]: ${formattedMessage}`;
+  const metaStr = Object.keys(meta).length ? " " + JSON.stringify(meta) : "";
+  return `${timestamp} [${label}] [${level}]: ${formattedMessage}${metaStr}`;
 });
 
 const logger = createLogger({

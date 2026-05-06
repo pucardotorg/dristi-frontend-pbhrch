@@ -61,6 +61,7 @@ async function processTitlePageSection(
     const titlepageIndexSection = indexCopy.sections?.find(
       (section) => section.name === "titlepage"
     );
+    if (!titlepageIndexSection) return;
 
     titlepageIndexSection.lineItems = [
       {

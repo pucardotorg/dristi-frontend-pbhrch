@@ -237,6 +237,7 @@ async function processAccusedEvidence(
   const accusedEvidenceIndexSection = indexCopy.sections?.find(
     (section) => section.name === "accusedevidence"
   );
+  if (!accusedEvidenceIndexSection) return;
   accusedEvidenceIndexSection.lineItems =
     accusedEvidenceLineItems?.filter(Boolean);
 }

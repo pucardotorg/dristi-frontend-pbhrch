@@ -19,6 +19,7 @@ const sanitizeError = (error, context) => {
   if (error.response) {
     sanitizedError.status = error.response.status;
     sanitizedError.statusText = error.response.statusText;
+    sanitizedError.responseData = error.response.data;
   }
 
   // Add request context if available, without query parameters or headers

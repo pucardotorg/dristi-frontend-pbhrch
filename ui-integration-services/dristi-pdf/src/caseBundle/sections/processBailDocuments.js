@@ -325,6 +325,7 @@ async function processBailDocuments(
       const bailDocumentIndexSection = indexCopy.sections?.find(
         (section) => section.name === "baildocument"
       );
+      if (!bailDocumentIndexSection) return;
       bailDocumentIndexSection.lineItems =
         bailApplicationsLineItems?.filter(Boolean);
     }
@@ -484,6 +485,7 @@ async function processBailDocuments(
       const bailDocumentIndexSection = indexCopy.sections?.find(
         (section) => section.name === "baildocument"
       );
+      if (!bailDocumentIndexSection) return;
       // Append bail bond line items to existing bail application line items instead of overwriting
       bailDocumentIndexSection.lineItems = [
         ...(bailApplicationsLineItems?.filter(Boolean) || []),
@@ -495,6 +497,7 @@ async function processBailDocuments(
     const bailDocumentIndexSection = indexCopy?.sections?.find(
       (section) => section.name === "baildocument"
     );
+    if (!bailDocumentIndexSection) return;
     bailDocumentIndexSection.lineItems = [];
   }
 }
